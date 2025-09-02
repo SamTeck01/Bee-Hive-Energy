@@ -1,13 +1,15 @@
-// src/pages/ProductPage.jsx
+ // src/pages/ProductPage.jsx
 import { useParams, Link } from 'react-router-dom';
-import productCategories from '../assets/product_categories';
 import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2 } from 'lucide-react';
 import SendWhatsAppMessage from './SendWhatsappMessage';
 import { HashLink } from 'react-router-hash-link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useWishlist } from './WishlistContext';
 import { ProductCard } from './ProductCard';
+import AddToCartButton from './AddToCartButton';
+import { ProductsContext } from './ProductsContext';
+import { ProductsCategoryContext } from './ProductCategoryContext';
 
 export default function ProductPage() {
   useEffect(() => {
@@ -15,8 +17,13 @@ export default function ProductPage() {
   }, []);
 
   const { productWishlist, toggleProductWishlist } = useWishlist();
+  const { products } = useContext(ProductsContext);
+  const { productsCategory } = useContext(ProductsCategoryContext);
+
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [openSections, setOpenSections] = useState([]);
+
 
   const triggerToast = (message) => {
     setToastMessage(message);
@@ -25,21 +32,28 @@ export default function ProductPage() {
   };
 
   const { categoryId, productId } = useParams();
-  
-  const category = productCategories.find(c => c.id === categoryId);
-  if (!category) return <h2 className="text-center py-24">Category not found</h2>;
-  
-  const product = category.products.find(p => p.id === productId);
+
+  // ✅ get product from backend
+  const product = products.find(p => String(p._id) === String(productId));
+  // initialize open sections when product changes
+  useEffect(() => {
+    if (product?.sections) {
+      setOpenSections(product.sections.map(() => true));
+    }
+  }, [product]);
   if (!product) return <h2 className="text-center py-24">Product not found</h2>;
+
+  const isWishlisted = productWishlist.includes(product._id);
+
+  // ✅ filter similar products from backend by same category
+  const similarProduct = products
+    .filter(p => p._id !== product._id && String(p.category_id) === String(categoryId))
+    .slice(0, 7);
+  console.log('Similar Products:', similarProduct);
   
-  const isWishlisted = productWishlist.includes(product.id);
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [openSections, setOpenSections] = useState(
-    product && product.sections ? product.sections.map(() => true) : []
-  );
-
-  const similarProduct = category.products.filter(p => p.id !== productId).slice(0, 7); // Show top 3
+  // ✅ get category from nocodb
+  const category = productsCategory.find(c => String(c.slug) === String(categoryId));
+  if (!category) return <h2 className="text-center py-24">Category not found</h2>;
 
   const toggleSection = (index) => {
     setOpenSections((prev) =>
@@ -63,7 +77,7 @@ export default function ProductPage() {
 
   return (
     <section className="px-4 py-24">
-      {/*Toast Notification */}
+      {/* ✅ Toast Notification */}
       <AnimatePresence>
         {showToast && (
           <motion.div
@@ -83,7 +97,7 @@ export default function ProductPage() {
 
       <div className="md:container w-90 -mx-1 md:mx-auto relative">
         <Link to={`/products/${categoryId}`} className="text-sm text-gray-500 hover:text-gold2 mb-4 inline-block">
-          ← Back to {category.title}
+          ← Back to {category.name}
         </Link>
 
         {/* Breadcrumbs */}
@@ -91,6 +105,8 @@ export default function ProductPage() {
           <Link to="/" className="hover:text-gold2">Home</Link>
           <ChevronRight size={16} />
           <Link to="/products" className="hover:text-gold2">Products</Link>
+          <ChevronRight size={16} />
+          <Link to={`/category/${product.categoryName}`}>{product.categoryName}</Link>
           <ChevronRight size={16} />
           <span className="text-black font-medium">{product.name}</span>
         </nav>
@@ -158,7 +174,8 @@ export default function ProductPage() {
                   </li>
                 ))}
               </ul>
-
+              
+              <AddToCartButton item={product} />
               <button 
                 onClick={() => SendWhatsAppMessage(`Hello, I'm interested in the ${product.name} plan`)} 
                 className="bg-gold2 hover:bg-gold2/80 text-white font-medium px-6 py-3 rounded-md flex justify-between items-center gap-2 mt-3 transition w-full"
@@ -172,7 +189,7 @@ export default function ProductPage() {
           <div className="bg-white md:bg-transparent p-3 rounded-lg md:shadow-none shadow-md">
             <h2 className="text-lg font-semibold text-black mb-4">Description</h2>
 
-            {product.sections.map((section, index) => (
+            {product.section?.map((section, index) => (
               <div key={index} className="mb-4">
                 <button
                   onClick={() => toggleSection(index)}
@@ -213,8 +230,8 @@ export default function ProductPage() {
             <div className='overflow-x-auto whitespace-nowrap scroll-smooth snap-x snap-mandatory pb-2' >
               <div className="flex gap-3">
                 {similarProduct.map((similar, idx) => (
-                  <HashLink smooth to={`/plans/${similar.id}`}
-                    key={similar.id}
+                  <HashLink smooth to={`/plans/${similar._id}`}
+                    key={similar._id}
                   >
                     <ProductCard
                       categoryId={categoryId}
@@ -223,7 +240,7 @@ export default function ProductPage() {
                       productId={similar.id}
                       custom={idx}
                       price={similar.price}
-                      key={similar.id}
+                      key={similar._id}
                       onToast={triggerToast}
                     />
                   </HashLink>

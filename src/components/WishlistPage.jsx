@@ -1,16 +1,26 @@
 import { useWishlist } from "./WishlistContext";
-import plans from "../assets/all_plans";
 import { HashLink } from "react-router-hash-link";
 import { Link } from "react-router-dom";
-import productCategories from "../assets/product_categories";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { PlansContext } from "./PlansContext.jsx";
+import { ProductsContext } from "./ProductsContext.jsx";
+import { ProductsCategoryContext } from "./ProductCategoryContext.jsx";
 
 export default function WishlistPage() {
   const { productWishlist, planWishlist, toggleProductWishlist, togglePlanWishlist } = useWishlist();
   const [activeTab, setActiveTab] = useState('plan');
-  const wishlistedPlans = plans.filter(plan => planWishlist.includes(plan.slug));
-  const allProducts = productCategories.flatMap(cat => cat.products);
-  const wishlistedProducts = allProducts.filter(product => productWishlist.includes(product.id));
+
+  // use runtime data from providers instead of local assets
+  const { plans } = useContext(PlansContext);
+  const { products } = useContext(ProductsContext);
+  const { productsCategory } = useContext(ProductsCategoryContext);
+
+  const wishlistedPlans = (plans || []).filter(plan => Array.isArray(planWishlist) && planWishlist.includes(plan.slug));
+
+  const wishlistedProducts = (products || []).filter(prod => {
+    const pid = prod._id || prod.id;
+    return Array.isArray(productWishlist) && productWishlist.includes(pid);
+  });
 
   const isEmpty = wishlistedPlans.length === 0 && wishlistedProducts.length === 0;
 
@@ -82,31 +92,37 @@ export default function WishlistPage() {
                 {wishlistedProducts.length === 0 ? (
                   <div className="text-center text-gray-500">No products in wishlist.</div>
                 ) : (
-                  wishlistedProducts.map(product => (
-                    <div key={product.id} className="flex justify-between border border-ash/20 rounded-[5px] p-4 shadow-sm">
-                      <div className="flex flex-row">
-                        <img src={product.image} alt={product.name} className="w-20 h-20 md:w-24 md:h-24 object-cover rounded" />
-                        <div className="ml-4 flex flex-col justify-between ">
-                          <h2 className="text-[13px] font-medium text-black">{product.name}</h2>
-                          <p className="text-gold2 font-medium text-lg">{product.price}</p>
+                  wishlistedProducts.map(product => {
+                    const pid = product._id || product.id;
+                    // try to resolve category slug (backend categories or product property)
+                    const cat = (productsCategory || []).find(c => String(c.title) === String(product.category_name) || String(c.title) === String(product.category) || String(c.slug) === String(product.category));
+                    const categorySlug = cat?.slug || product.category || 'products';
+                    return (
+                      <div key={pid} className="flex justify-between border border-ash/20 rounded-[5px] p-4 shadow-sm">
+                        <div className="flex flex-row">
+                          <img src={product.image} alt={product.name} className="w-20 h-20 md:w-24 md:h-24 object-cover rounded" />
+                          <div className="ml-4 flex flex-col justify-between ">
+                            <h2 className="text-[13px] font-medium text-black">{product.name}</h2>
+                            <p className="text-gold2 font-medium text-lg">{product.price}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col md:flex-row justify-end items-center gap-2">
+                          <button
+                            onClick={() => toggleProductWishlist(pid)}
+                            className="text-gold2 text-base hover:bg-gold2/25 rounded px-4 py-1.5 transition h-fit"
+                          >
+                            Remove
+                          </button>
+                          <Link 
+                            to={`/products/${categorySlug}/${pid}`}
+                            className="bg-gold2 text-white text-sm px-4 py-1.5 rounded hover:bg-gold2/80 transition shadow-md h-fit"
+                          >
+                            View
+                          </Link>
                         </div>
                       </div>
-                      <div className="flex flex-col md:flex-row justify-end items-center gap-2">
-                        <button
-                          onClick={() => toggleProductWishlist(product.id)}
-                          className="text-gold2 text-base hover:bg-gold2/25 rounded px-4 py-1.5 transition h-fit"
-                        >
-                          Remove
-                        </button>
-                        <Link 
-                          to={`/products/${product.id}`}
-                          className="bg-gold2 text-white text-sm px-4 py-1.5 rounded hover:bg-gold2/80 transition shadow-md h-fit"
-                        >
-                          View
-                        </Link>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}

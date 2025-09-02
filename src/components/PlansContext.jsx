@@ -10,18 +10,13 @@ export const PlansProvider = ({ children }) => {
   useEffect(() => {
     const fetchPlans = async () => {
         try {
-            const response = await fetch('https://app.nocodb.com/api/v2/tables/ma88xwy2lm6vso6/records?offset=0&limit=25&where=&viewId=vwi7dvlktu2ek5sm', {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'xc-token': 'mqtJCDv1JtwM_2rl7m3kKRqCkwojiUKq_RlrWCxr' // 🔐 Include this if your data needs auth
-                }
-            });
+            const response = await fetch("https://bee-energy-backend.onrender.com/api/plans");
             const data = await response.json();
-            setPlans(data.list); // adjust if data format is different
-            console.log('Plans fetched successfully:');
+            setPlans(data); // adjust if data format is different
+            console.log('Plans fetched successfully:', data);
         } catch (error) {
-            console.error('Failed to fetch plans:', error);
+            console.error('Failed to fetch plans:', error, 'Reloading...');
+            fetchPlans();
         }
     };
     fetchPlans();

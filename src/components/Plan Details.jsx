@@ -1,46 +1,26 @@
 import { useParams } from 'react-router-dom';
-//import plans from '../assets/all_plans';
+import { useContext, useEffect, useState } from 'react';
+import { PlansContext } from './PlansContext.jsx';
 import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2 } from 'lucide-react';
 import SendWhatsAppMessage from './SendWhatsappMessage';
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
 import { useWishlist } from './WishlistContext';
-import { useContext } from 'react';
-import { PlansContext } from './PlansContext';
 
 
 const PlanDetails = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-  const { plans } = useContext(PlansContext);
+
   const { planWishlist, togglePlanWishlist } = useWishlist();
   const [showToast, setShowToast] = useState(false);
-  const [parsedDescription, setParsedDescription] = useState([]);
-  const [openSections, setOpenSections] = useState([]);
 
-  const { slug } = useParams();
-  const plan = plans.find((item) => item.slug === slug);
+  const { plans } = useContext(PlansContext);
 
-  useEffect(() => {
-    if (!plan?.description) return;
-
-    try {
-      const parsed = JSON.parse(plan.description);
-      setParsedDescription(parsed);
-      setOpenSections(parsed.map(() => true));
-    } catch (err) {
-      console.error("Failed to parse plan description:", err);
-    }
-  }, [plan]);
-  
-  if (!plan || !plan.description) {
-    return <div className='py-24 text-center'>Loading plan details...</div>;
-  }else{null}
-  
   const handleWishlistToggle = () => {
+    if (!plan) return;
     togglePlanWishlist(plan.slug);
     setShowToast(true);
 
@@ -49,18 +29,28 @@ const PlanDetails = () => {
     }, 3000); // 3 seconds
   };
   
-  const isWishlisted = planWishlist.includes(plan.slug);
-  
-  let parsedFeatures = [];
-  try {
-    // Replace curly braces with square brackets
-    parsedFeatures = JSON.parse(plan.features.replace(/^{/, '[').replace(/}$/, ']'));
-  } catch (err) {
-    console.error('Error parsing features:', err);
+  const { slug } = useParams();
+  const plan = (plans || []).find((item) => item.slug === slug); console.log(plan);
+
+  const isWishlisted = Boolean(plan && planWishlist.includes(plan.slug));
+
+  const [openSections, setOpenSections] = useState([]);
+
+  // initialize sections when plan loads
+  useEffect(() => {
+    if (plan?.descriptions) {
+      setOpenSections(plan.descriptions.map(() => true));
+    } else {
+      setOpenSections([]);
+    }
+  }, [plan]);
+
+  if (!plan) {
+    return <p className="text-center mt-20 text-red-500">Plan not found</p>;
   }
   
-  // Filter out the current plan to show others
-  const similarPlans = plans.filter(p => p.slug !== slug).slice(0, 3); // Show top 3
+  // Filter out the current plan to show others (from runtime plans)
+  const similarPlans = (plans || []).filter(p => p.slug !== slug).slice(0, 3); // Show top 3
 
   const toggleSection = (index) => {
     setOpenSections((prev) =>
@@ -138,7 +128,7 @@ const PlanDetails = () => {
             {/* Details */}
             <div className='w-full bg-white md:bg-transparent p-3 rounded-lg'>
               <h1 className="text-2xl font-bold text-gray-800">{plan.title}</h1>
-              <p className="text-gray-500 mt-1">{plan.subtext || 'Smart Energy Plan for Modern Homes'}</p>
+              <p className="text-gray-500 mt-1">{plan?.subtext || 'Smart Energy Plan for Modern Homes'}</p>
 
               <p className="text-2xl text-gray-800 font-bold mt-3">{plan.price}</p>
 
@@ -166,7 +156,7 @@ const PlanDetails = () => {
               </div> 
 
               <ul className="space-y-1 my-4 text-gray-600">
-                {parsedFeatures.map((feat, idx) => (
+                {plan.features.map((feat, idx) => (
                   <li key={idx} className="flex items-center gap-2">
                     <AlertCircle size={14} className="text-green-600"/> {feat}
                   </li>
@@ -195,7 +185,7 @@ const PlanDetails = () => {
           <div className="bg-white md:bg-transparent p-3 rounded-lg md:shadow-none shadow-md">
             <h2 className="text-lg font-semibold text-black mb-4">Description</h2>
 
-            {parsedDescription.map((section, index) => (
+            {plan.descriptions?.map((section, index) => (
               <div key={index} className="mb-4">
                 <button
                   onClick={() => toggleSection(index)}

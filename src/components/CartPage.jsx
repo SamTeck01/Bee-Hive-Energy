@@ -28,24 +28,25 @@ const CartPage = () => {
     }).format(numericPrice);
   };
 
-  // Merge cart items with their full data
+  // Merge cart items (stored as id->qty map) with their full data.
+  // Keys in cartItems are strings, so normalize lookups accordingly.
   const cartItemList = Object.entries(cartItems).map(([itemId, quantity]) => {
+    const key = String(itemId);
     const item =
-      plans?.find(i => i.slug === itemId) ||
-      products?.find(i => i.id === itemId);
+      plans?.find(i => String(i.slug) === key) ||
+      products?.find(i => String(i.id) === key);
 
-    return item ? { ...item, quantity } : null;
+    // attach a stable React key and normalized id
+    return item ? { ...item, quantity, cartKey: key, cartId: key } : null;
   }).filter(Boolean);
-
-
-
 
   const getCartTotal = () => {
     return cartItemList.reduce((total, item) => {
-      const price = typeof item.price === 'string'
-        ? parseFloat(item.price.replace(/[₦,]/g, ''))
-        : item.price;
-      return total + price * item.quantity;
+  let price = 0;
+  if (item.price == null) price = 0;
+  else if (typeof item.price === 'string') price = parseFloat(item.price.replace(/[₦,\s,]/g, '')) || 0;
+  else price = Number(item.price) || 0;
+  return total + price * (Number(item.quantity) || 0);
     }, 0);
   };
   console.log('Cart Items:', cartItemList);
@@ -83,7 +84,7 @@ const CartPage = () => {
 
               <div className="divide-y">
                 {cartItemList.map(item => (
-                  <div key={item.id} className="p-6 flex items-center space-x-4">
+                  <div key={item.cartKey || item.id || item.slug} className="p-6 flex items-center space-x-4">
                     <img
                       src={item.image || '/placeholder-image.jpg'}
                       alt={item.name}
@@ -102,7 +103,7 @@ const CartPage = () => {
 
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.cartId || item.id || item.slug)}
                         className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                       >
                         -
@@ -113,7 +114,7 @@ const CartPage = () => {
                       </span>
 
                       <button
-                        onClick={() => addToCart(item.id, item.type)}
+                        onClick={() => addToCart(item.cartId || item.id || item.slug, item.type)}
                         className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                       >
                         +
@@ -122,10 +123,10 @@ const CartPage = () => {
 
                     <div className="text-right">
                       <p className="font-semibold">
-                        {formatPrice(item.price * item.quantity)}
+                        {formatPrice((Number(item.price) || 0) * Number(item.quantity))}
                       </p>
                       <button
-                        onClick={() => deleteCartItem(item.id)}
+                        onClick={() => deleteCartItem(item.cartId || item.id || item.slug)}
                         className="text-red-600 text-sm hover:text-red-700 mt-1"
                       >
                         Remove

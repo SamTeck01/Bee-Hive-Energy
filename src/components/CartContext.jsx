@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 
 export const CartContext = createContext(null);
@@ -15,30 +16,51 @@ export const CartProvider =({ children })=> {
     console.log('Cart items updated:', cartItems);
   }, [cartItems]);
 
-  // Add item by ID
+  // Add item by ID (increments quantity). Accepts a string id.
   const addToCart = (itemId) => {
+    const key = String(itemId);
     setCartItems(prev => ({
       ...prev,
-      [itemId]: (prev[itemId] || 0) + 1
+      [key]: (prev[key] || 0) + 1
     }));
   };
 
-  // Remove one unit
+  // Remove one unit; if quantity reaches 0, remove the key entirely
   const removeFromCart = (itemId) => {
+    const key = String(itemId);
     setCartItems(prev => {
-      const newQty = (prev[itemId] || 0) - 1;
-      return {
-        ...prev,
-        [itemId]: newQty > 0 ? newQty : 0
-      };
+      const current = prev[key] || 0;
+      const newQty = current - 1;
+      const updated = { ...prev };
+      if (newQty > 0) {
+        updated[key] = newQty;
+      } else {
+        delete updated[key];
+      }
+      return updated;
     });
   };
 
   // Delete item completely
   const deleteCartItem = (itemId) => {
+    const key = String(itemId);
     setCartItems(prev => {
       const updated = { ...prev };
-      delete updated[itemId];
+      delete updated[key];
+      return updated;
+    });
+  };
+
+  // Explicitly set quantity for an item (useful for inputs)
+  const updateItemQuantity = (itemId, quantity) => {
+    const key = String(itemId);
+    setCartItems(prev => {
+      const updated = { ...prev };
+      if (!quantity || quantity <= 0) {
+        delete updated[key];
+      } else {
+        updated[key] = quantity;
+      }
       return updated;
     });
   };
@@ -68,6 +90,7 @@ export const CartProvider =({ children })=> {
     cartItems,
     addToCart,
     removeFromCart,
+  updateItemQuantity,
     deleteCartItem,
     clearCart,
     getTotalCartItems,
@@ -90,124 +113,3 @@ export const useCart = () => {
   }
   return context;
 };
-
-
-// import { createContext, useContext, useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
-
-// const CartContext = createContext();
-
-// export const CartProvider = ({ children }) => {
-//   const [cartItems, setCartItems] = useState([]);
-
-//   // Load cart items from localStorage on mount
-//   useEffect(() => {
-//     const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-//     setCartItems(storedCartItems);
-//   }, []);
-
-//   // Save cart items to localStorage whenever they change
-//   useEffect(() => {
-//     localStorage.setItem('cartItems', JSON.stringify(cartItems));
-//   }, [cartItems]);
-
-//   const addToCart = (item) => {
-//     console.log('Adding to cart:', item);
-//     const itemId = item.slug || item.id;
-//     const price = item.new_price || item.price || 0;
-    
-//     setCartItems((prevItems) => {
-//       const existingItem = prevItems.find(
-//         (cartItem) => (cartItem.slug || cartItem.id) === itemId
-//       );
-
-//       if (existingItem) {
-//         return prevItems.map((cartItem) =>
-//           (cartItem.slug || cartItem.id) === itemId
-//             ? { ...cartItem, quantity: cartItem.quantity + 1 }
-//             : cartItem
-//         );
-//       } else {
-//         return [...prevItems, { ...item, price, quantity: 1 }];
-//       }
-//     });
-//   };
-
-//   const removeFromCart = (itemId) => {
-//     setCartItems((prevItems) =>
-//       prevItems.filter((item) => (item.slug || item.id) !== itemId)
-//     );
-//   };
-
-//   const updateQuantity = (itemId, quantity) => {
-//     if (quantity <= 0) {
-//       removeFromCart(itemId);
-//       return;
-//     }
-
-//     setCartItems((prevItems) =>
-//       prevItems.map((item) =>
-//         (item.slug || item.id) === itemId
-//           ? { ...item, quantity }
-//           : item
-//       )
-//     );
-//   };
-
-//   const clearCart = () => {
-//     setCartItems([]);
-//   };
-
-//   const getCartTotal = () => {
-//     return cartItems.reduce((total, item) => total + ((item.new_price || item.price || 0) * item.quantity), 0);
-//   };
-
-//   const getCartItemsCount = () => {
-//     return cartItems.reduce((count, item) => count + item.quantity, 0);
-//   };
-
-//   const getCartItemsByType = (type) => {
-//     return cartItems.filter(item => item.type === type);
-//   };
-
-//   const getCartTotalByType = (type) => {
-//     return cartItems
-//       .filter(item => item.type === type)
-//       .reduce((total, item) => total + ((item.new_price || item.price || 0) * item.quantity), 0);
-//   };
-
-//   const isInCart = (itemId) => {
-//     return cartItems.some(item => (item.slug || item.id) === itemId);
-//   };
-
-//   return (
-//     <CartContext.Provider
-//       value={{
-//         cartItems,
-//         addToCart,
-//         removeFromCart,
-//         updateQuantity,
-//         clearCart,
-//         getCartTotal,
-//         getCartItemsCount,
-//         getCartItemsByType,
-//         getCartTotalByType,
-//         isInCart,
-//       }}
-//     >
-//       {children}
-//     </CartContext.Provider>
-//   );
-// };
-
-// CartProvider.propTypes = {
-//   children: PropTypes.node.isRequired,
-// };
-
-// export const useCart = () => {
-//   const context = useContext(CartContext);
-//   if (!context) {
-//     throw new Error('useCart must be used within a CartProvider');
-//   }
-//   return context;
-// };

@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 import { PlansContext } from './PlansContext.jsx';
 import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2 } from 'lucide-react';
 import SendWhatsAppMessage from './SendWhatsappMessage';
+import AddToCartButton from './AddToCartButton';
+
 import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -105,7 +107,7 @@ const PlanDetails = () => {
         <div className="md:bg-white bg-transparent rounded-lg grid grid-cols-1 gap-2 md:gap-2 md:w-[75%] w-full">
 
           <div className='flex md:flex-row flex-col gap-2 md:gap-10'>
-            {/* Image */}
+            {/* Image and Add to Cart */}
             <div className='md:w-[280px] w-full flexCenter shrink-0 md:flex md:items-start flex-col bg-white md:bg-transparent p-3 rounded-lg shadow-md md:shadow-none'>
               <div>
                 <img 
@@ -113,7 +115,7 @@ const PlanDetails = () => {
                   alt={plan.title} 
                   className="w-full rounded-lg shadow-lg"
                 />
-              </div>  
+              </div>
 
               <div className="mt-6 hidden md:grid">
                 <h3 className="text-lg font-semibold mb-2 text-gray-700">Promotions</h3>
@@ -162,6 +164,14 @@ const PlanDetails = () => {
                   </li>
                 ))}
               </ul>
+
+              <div className="mt-4 w-full flex flex-col items-center">
+                <AddToCartButton item={{
+                  ...plan,
+                  id: plan.slug,
+                  type: 'plan',
+                }} />
+              </div>
 
               <button 
                 onClick={() => SendWhatsAppMessage(`Hello, I'm interested in the ${plan.title} plan`)} 

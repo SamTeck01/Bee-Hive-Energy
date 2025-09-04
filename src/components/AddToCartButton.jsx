@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useCart } from './CartContext';
 
 const AddToCartButton = ({ item, className = '' }) => {
-  const { addToCart, cartItems } = useCart();
+  const { addToCart, cartItems, getItemQuantity, isInCart } = useCart();
 
   if (!item) return null;
 
@@ -11,10 +11,11 @@ const AddToCartButton = ({ item, className = '' }) => {
 
   if (!itemId || !itemType) return null;
 
-  const isInCart = !!cartItems[itemId];
+  const quantity = getItemQuantity ? getItemQuantity(itemId) : (cartItems[itemId] || 0);
+  const inCart = isInCart ? isInCart(itemId) : quantity > 0;
 
   const handleAddToCart = () => {
-    addToCart(itemId, itemType);
+    addToCart(String(itemId));
   };
 
   return (
@@ -26,7 +27,7 @@ const AddToCartButton = ({ item, className = '' }) => {
           : 'bg-blue-600 text-white hover:bg-blue-700'
       } ${className}`}
     >
-      {isInCart ? 'Added to Cart' : 'Add to Cart'}
+  {inCart ? `In Cart (${quantity})` : 'Add to Cart'}
     </button>
   );
 };

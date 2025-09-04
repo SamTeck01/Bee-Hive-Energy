@@ -16,6 +16,7 @@ import IoTEnergySolutions from './components/IotSolution.jsx';
 import GalleryPro from './components/Gallery.jsx';
 import CartPage from './components/CartPage.jsx';
 import Checkout from './components/Checkout.jsx';
+import SearchResults from './components/SearchResults.jsx';
 
 import { WishlistProvider } from './components/WishlistContext.jsx';
 import { PlansProvider } from './components/PlansContext.jsx';
@@ -45,6 +46,7 @@ export default function App() {
 
                     {/* Products */}
                     <Route path="/products" element={<AllProductsPage />} />
+                    <Route path="/search" element={<SearchResults />} />
                     <Route path="/products/:categoryId" element={<ProductCategoryPage />} />
                     <Route path="/products/:categoryId/:productId" element={<ProductDetailsPage />} />
 

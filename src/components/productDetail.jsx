@@ -22,15 +22,7 @@ export default function ProductPage() {
 
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
-  const [openSections, setOpenSections] = useState([]);
-
-
-  const triggerToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
-
+  
   const { categoryId, productId } = useParams();
 
   // ✅ get product from backend
@@ -41,15 +33,31 @@ export default function ProductPage() {
       setOpenSections(product.sections.map(() => true));
     }
   }, [product]);
+
+  const [openSections, setOpenSections] = useState([]);
+  // initialize sections when plan loads
+  useEffect(() => {
+    if (product?.section) {
+      setOpenSections(product.section.map(() => true));
+    } else {
+      setOpenSections([]);
+    }
+  }, [product]);
+
+  const triggerToast = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   if (!product) return <h2 className="text-center py-24">Product not found</h2>;
 
   const isWishlisted = productWishlist.includes(product._id);
 
   // ✅ filter similar products from backend by same category
   const similarProduct = products
-    .filter(p => p._id !== product._id && String(p.category_id) === String(categoryId))
+    .filter(p => p._id !== product._id && String(p.category_name.replace(" ", "-").toLowerCase()) === String(categoryId))
     .slice(0, 7);
-  console.log('Similar Products:', similarProduct);
   
   // ✅ get category from nocodb
   const category = productsCategory.find(c => String(c.slug) === String(categoryId));
@@ -77,7 +85,7 @@ export default function ProductPage() {
 
   return (
     <section className="px-4 py-24">
-      {/* ✅ Toast Notification */}
+      {/* Toast Notification */}
       <AnimatePresence>
         {showToast && (
           <motion.div
@@ -97,7 +105,7 @@ export default function ProductPage() {
 
       <div className="md:container w-90 -mx-1 md:mx-auto relative">
         <Link to={`/products/${categoryId}`} className="text-sm text-gray-500 hover:text-gold2 mb-4 inline-block">
-          ← Back to {category.name}
+          ← Back to {category.title.toLowerCase()}
         </Link>
 
         {/* Breadcrumbs */}
@@ -106,10 +114,19 @@ export default function ProductPage() {
           <ChevronRight size={16} />
           <Link to="/products" className="hover:text-gold2">Products</Link>
           <ChevronRight size={16} />
-          <Link to={`/category/${product.categoryName}`}>{product.categoryName}</Link>
+          <Link to={`/products/${category.slug}`} className='hover:text-gold2'>{product.category_name}</Link>
           <ChevronRight size={16} />
           <span className="text-black font-medium">{product.name}</span>
         </nav>
+
+        {/* Add to Cart Button */}
+        <div className="my-4 flex items-center">
+          <AddToCartButton item={{
+            ...product,
+            id: product._id,
+            type: 'product',
+          }} />
+        </div>
 
         <div className="md:bg-white bg-transparent rounded-lg grid grid-cols-1 gap-2 md:gap-2 md:w-[75%] w-full">
 
@@ -188,6 +205,10 @@ export default function ProductPage() {
           {/* Description */}
           <div className="bg-white md:bg-transparent p-3 rounded-lg md:shadow-none shadow-md">
             <h2 className="text-lg font-semibold text-black mb-4">Description</h2>
+            
+            {product.section?.length === 0 && (
+              <p className="text-gray-600">No description available for this product.</p>
+            )}
 
             {product.section?.map((section, index) => (
               <div key={index} className="mb-4">
@@ -237,7 +258,7 @@ export default function ProductPage() {
                       categoryId={categoryId}
                       image={similar.image}
                       title={similar.name}
-                      productId={similar.id}
+                      productId={similar._id}
                       custom={idx}
                       price={similar.price}
                       key={similar._id}
@@ -245,6 +266,9 @@ export default function ProductPage() {
                     />
                   </HashLink>
                 ))}
+                {similarProduct.length === 0 && (
+                  <p className="text-gray-500 ps-1">No similar products found.</p>
+                )}
               </div>
             </div>
           </div>

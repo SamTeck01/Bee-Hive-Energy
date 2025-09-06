@@ -3,10 +3,13 @@ import { HashLink } from 'react-router-hash-link';
 import { Link } from 'react-router-dom';
 import logo from '../assets/IMG-20250526-WA0150.png';
 import { useState, useEffect } from 'react';
+import { useLoading } from './LoadingContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import SendWhatsAppMessage from './SendWhatsappMessage';
-import { ShoppingCart, X, Search, MenuIcon, SearchIcon, MessageSquareText, SearchX } from "lucide-react";
+import { useCart } from './CartContext.jsx';
+import { ShoppingCart, X, Search, MenuIcon, SearchIcon, SearchX } from "lucide-react";
 import { Home, Package, Box, Wrench, Phone, Heart } from "lucide-react";
+import WhatsappIcon from '../assets/whatsapp.svg';
 
 const NewHeader = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -16,6 +19,7 @@ const NewHeader = () => {
   const [isActive, setIsActive] = useState('#home');
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const { isLoading } = useLoading();
 
   const handleClick = (section) => {
     setIsActive(section);
@@ -33,6 +37,10 @@ const NewHeader = () => {
     setIsOpenPc(false);
     setIsStickyPc(false);
   };
+
+  // cart total
+  const { getTotalCartItems } = useCart();
+  const totalCart = getTotalCartItems();
 
   const linkClass = (section) => `hover:text-gold2 font-medium transition duration-300 ${section === isActive ? 'text-gold2 font-bold' : ''}`;
 
@@ -54,6 +62,10 @@ const NewHeader = () => {
   return (
     <>
       <header className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-2' : 'bg-gold py-3 md:py-4'}`}>
+        {/* top progress bar for global loading */}
+        <div className="absolute left-0 top-0 w-full h-1 z-50">
+          <div className={`h-1 bg-[#e49900] transition-all duration-300 ${isLoading ? 'w-full opacity-100' : 'w-0 opacity-0'}`} />
+        </div>
         <div className="container mx-auto px-4 md:p-0">
           <div className="flex justify-between items-center relative">
 
@@ -141,8 +153,14 @@ const NewHeader = () => {
             </div>
 
             <div className="hidden md:flexCenter gap-4">
-              <HashLink smooth to="/cart" className="text-black font-medium transition duration-300 mt-1">
-                <span className="inline-flex items-center gap-2 "><ShoppingCart size={18} />Cart</span>
+              <HashLink smooth to="/cart" className="text-black font-medium transition duration-300 mt-1 relative">
+                <span className="inline-flex items-center gap-2 ">
+                  <ShoppingCart size={18} />
+                  {totalCart > 0 && (
+                    <span className="absolute -top-2 left-2 bg-gold2 text-white text-[10px] font-semibold rounded-full w-[14px] h-[14px] flex items-center justify-center">{totalCart}</span>
+                  )}
+                  Cart
+                </span>
               </HashLink>
 
               <button
@@ -165,15 +183,18 @@ const NewHeader = () => {
                 {isSearchOpen ? <SearchX size={22} /> : <SearchIcon size={22} />} 
               </button>
 
-              <HashLink smooth to="/cart" className="text-black">
+              <HashLink smooth to="/cart" className="text-black relative">
                 <ShoppingCart size={22} />
+                {totalCart > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-gold2 text-white text-sm font-semibold rounded-full w-5 h-5 flex items-center justify-center">{totalCart}</span>
+                )}
               </HashLink>
 
               <button 
                 onClick={() => SendWhatsAppMessage('Hi! I’d like to learn more about your services and discuss how they might fit my business needs. Can we chat about the features and pricing? Thanks!')}
                 className="text-black"
               >
-                <MessageSquareText size={22} />
+                <img src={WhatsappIcon} alt="Chat Us" className="w-5 h-5" />
               </button>
             
               {/* ✅ CTA Button for mobile 

@@ -30,6 +30,11 @@ const PlanDetails = () => {
       setShowToast(false);
     }, 3000); // 3 seconds
   };
+
+  const triggerToast = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
   
   const { slug } = useParams();
   const plan = (plans || []).find((item) => item.slug === slug); console.log(plan);
@@ -170,7 +175,7 @@ const PlanDetails = () => {
                   ...plan,
                   id: plan.slug,
                   type: 'plan',
-                }} />
+                }} onToast={triggerToast} />
               </div>
 
               <button 

@@ -119,15 +119,6 @@ export default function ProductPage() {
           <span className="text-black font-medium">{product.name}</span>
         </nav>
 
-        {/* Add to Cart Button */}
-        <div className="my-4 flex items-center">
-          <AddToCartButton item={{
-            ...product,
-            id: product._id,
-            type: 'product',
-          }} />
-        </div>
-
         <div className="md:bg-white bg-transparent rounded-lg grid grid-cols-1 gap-2 md:gap-2 md:w-[75%] w-full">
 
           <div className='flex md:flex-row flex-col gap-2 md:gap-10'>
@@ -192,7 +183,13 @@ export default function ProductPage() {
                 ))}
               </ul>
               
-              <AddToCartButton item={product} />
+              {/* Add to Cart Button */}
+              <AddToCartButton item={{
+                ...product,
+                id: product._id,
+                type: 'product',
+              }} onToast={triggerToast} classs={'md:flex hidden w-full'} />
+
               <button 
                 onClick={() => SendWhatsAppMessage(`Hello, I'm interested in the ${product.name} plan`)} 
                 className="bg-gold2 hover:bg-gold2/80 text-white font-medium px-6 py-3 rounded-md flex justify-between items-center gap-2 mt-3 transition w-full"

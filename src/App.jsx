@@ -23,15 +23,17 @@ import { PlansProvider } from './components/PlansContext.jsx';
 import { ProductsProvider } from './components/ProductsContext.jsx';
 import { CartProvider } from './components/CartContext.jsx';
 import { ProductsCategoryProvider } from './components/ProductCategoryContext.jsx';
+import { LoadingProvider } from './components/LoadingContext.jsx';
 
 export default function App() {
   return (
     <main className="text-tertiary">
-      <CartProvider>
-        <WishlistProvider>
-          <ProductsCategoryProvider>
-            <PlansProvider>
-              <ProductsProvider>
+      <LoadingProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <ProductsCategoryProvider>
+              <PlansProvider>
+                <ProductsProvider>
                 <BrowserRouter>
                   <ScrollToTop />
                   <Header />
@@ -67,11 +69,12 @@ export default function App() {
 
                   <Footer />
                 </BrowserRouter>
-              </ProductsProvider>
-            </PlansProvider>
-          </ProductsCategoryProvider>
-        </WishlistProvider>
-      </CartProvider>
+                  </ProductsProvider>
+                </PlansProvider>
+              </ProductsCategoryProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </LoadingProvider>
     </main>
   );
 }

@@ -7,33 +7,57 @@ export const CartContext = createContext(null);
 export const CartProvider =({ children })=> {
   const [cartItems, setCartItems] = useState(() => {
     const stored = localStorage.getItem('cartItems');
-    return stored ? JSON.parse(stored) : {};
+    if (!stored) return {};
+    try {
+      const parsed = JSON.parse(stored);
+      // migrate legacy format where values were numbers: { id: qty }
+      if (typeof parsed === 'object' && parsed !== null) {
+        const migrated = Object.entries(parsed).reduce((acc, [k, v]) => {
+          if (typeof v === 'number') {
+            acc[k] = { qty: v, type: null };
+          } else if (v && typeof v === 'object' && ('qty' in v || 'quantity' in v)) {
+            // support { qty } or { quantity }
+            acc[k] = { qty: v.qty ?? v.quantity ?? 0, type: v.type ?? null };
+          } else {
+            acc[k] = v;
+          }
+          return acc;
+        }, {});
+        return migrated;
+      }
+      return {};
+    } catch {
+      return {};
+    }
   });
 
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    console.log('Cart items updated:', cartItems);
   }, [cartItems]);
 
   // Add item by ID (increments quantity). Accepts a string id.
-  const addToCart = (itemId) => {
+  // addToCart accepts (itemId, type?) -> increments qty and stores type
+  const addToCart = (itemId, type = null) => {
     const key = String(itemId);
-    setCartItems(prev => ({
-      ...prev,
-      [key]: (prev[key] || 0) + 1
-    }));
+    setCartItems(prev => {
+      const existing = prev[key] || { qty: 0, type: null };
+      return {
+        ...prev,
+        [key]: { qty: (existing.qty || 0) + 1, type: type ?? existing.type ?? null }
+      };
+    });
   };
 
   // Remove one unit; if quantity reaches 0, remove the key entirely
   const removeFromCart = (itemId) => {
     const key = String(itemId);
     setCartItems(prev => {
-      const current = prev[key] || 0;
-      const newQty = current - 1;
+      const existing = prev[key] || { qty: 0 };
+      const newQty = (existing.qty || 0) - 1;
       const updated = { ...prev };
       if (newQty > 0) {
-        updated[key] = newQty;
+        updated[key] = { ...existing, qty: newQty };
       } else {
         delete updated[key];
       }
@@ -59,7 +83,8 @@ export const CartProvider =({ children })=> {
       if (!quantity || quantity <= 0) {
         delete updated[key];
       } else {
-        updated[key] = quantity;
+        const existing = prev[key] || { qty: 0, type: null };
+        updated[key] = { ...existing, qty: quantity };
       }
       return updated;
     });
@@ -73,17 +98,29 @@ export const CartProvider =({ children })=> {
 
   // Total quantity
   const getTotalCartItems = () => {
-    return Object.values(cartItems).reduce((sum, qty) => sum + qty, 0);
+    return Object.values(cartItems).reduce((sum, v) => {
+      const qty = (v && typeof v === 'object') ? (v.qty || 0) : (Number(v) || 0);
+      return sum + qty;
+    }, 0);
   };
 
   // Get quantity of a specific item
   const getItemQuantity = (itemId) => {
-    return cartItems[itemId] || 0;
+    const val = cartItems[String(itemId)];
+    if (!val) return 0;
+    if (typeof val === 'number') return val;
+    return val.qty || 0;
   };
 
   // Check if item is in cart
   const isInCart = (itemId) => {
-    return cartItems[itemId] > 0;
+    return getItemQuantity(itemId) > 0;
+  };
+
+  const getItemType = (itemId) => {
+    const val = cartItems[String(itemId)];
+    if (!val) return null;
+    return (typeof val === 'object') ? (val.type ?? null) : null;
   };
 
   const contextValue = {
@@ -96,6 +133,7 @@ export const CartProvider =({ children })=> {
     getTotalCartItems,
     getItemQuantity,
     isInCart,
+  getItemType,
   };
 
   return (

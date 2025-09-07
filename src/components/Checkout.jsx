@@ -3,11 +3,27 @@ import { useMemo, useContext } from 'react';
 import { PlansContext } from './PlansContext.jsx';
 import { ProductsContext } from './ProductsContext.jsx';
 
+// Checkout page — simplified and heavily commented so it's easy to follow
 export default function Checkout() {
+  // 1) Read the global cart object from the CartContext.
+  //    The shape stored in localStorage now is: { [itemId]: { qty: number, type: 'plan'|'product'|null } }
+  //    but older installations may still have { [itemId]: number } — we handle both.
   const { cartItems } = useCart();
 
-  const cartItemList = useMemo(() => Object.entries(cartItems).map(([id, qty]) => ({ id, qty })), [cartItems]);
+  // 2) Build a simple list of cart entries we can render safely.
+  //    Each entry becomes: { id: string, qty: number, type: string|null }
+  //    We use useMemo so we only recompute when cartItems changes.
+  const cartItemList = useMemo(() => {
+    return Object.entries(cartItems).map(([id, stored]) => {
+      // stored may be { qty, type } or a raw number (legacy)
+      const qty = (stored && typeof stored === 'object') ? (stored.qty || 0) : (Number(stored) || 0);
+      const type = (stored && typeof stored === 'object') ? (stored.type || null) : null;
+      return { id, qty, type };
+    });
+  }, [cartItems]);
 
+  // 3) A small helper to consistently format prices for display.
+  //    Takes numbers or strings like '₦1,200' and returns a locale formatted NGN string.
   const formatPrice = (price) => {
     const numericPrice = typeof price === 'string'
       ? parseFloat(price.replace(/[₦,]/g, ''))
@@ -19,141 +35,141 @@ export default function Checkout() {
     }).format(numericPrice || 0);
   };
 
+  // 4) Read the central product/plan datasets so we can look up full item details.
   const { plans } = useContext(PlansContext);
   const { products } = useContext(ProductsContext);
 
+  // 5) Compute subtotal by iterating the raw cart storage (we must handle both shapes).
+  //    We attempt to resolve an item first by the stored `type` (if present), otherwise
+  //    we try both lists as a fallback. If the item isn't found we skip it.
   const subtotal = useMemo(() => {
     return Object.entries(cartItems).reduce((sum, [id, stored]) => {
       const key = String(id);
       const qty = (stored && typeof stored === 'object') ? (stored.qty || 0) : (Number(stored) || 0);
       const type = (stored && typeof stored === 'object') ? (stored.type || null) : null;
+
+      // try to find the corresponding item object in plans or products
       const item =
         (type === 'plan' ? plans?.find(p => String(p.slug) === key) : null) ||
         (type === 'product' ? products?.find(p => String(p._id || p.id) === key) : null) ||
+        // fallback: try both lists when type is unknown
         plans?.find(p => String(p.slug) === key) || products?.find(p => String(p._id || p.id) === key);
-      if (!item) return sum;
-      const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[₦,\s,]/g, '')) || 0 : Number(item.price) || 0;
+
+      if (!item) return sum; // skip missing items
+
+      // item.price may be a string like '₦12,000' or a number — normalize to number
+      const price = typeof item.price === 'string'
+        ? parseFloat(item.price.replace(/[₦,\s,]/g, '')) || 0
+        : Number(item.price) || 0;
+
       return sum + price * Number(qty || 0);
     }, 0);
   }, [cartItems, plans, products]);
 
+  // 6) Render: form on the left, cart summary on the right. We show a simple
+  //    persistent 'CART SUMMARY' at the top with the computed subtotal.
   return (
-    <div className="py-24 px-4">
-      <div className="mx-auto container grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow-sm">
-        {/* Persistent cart summary (matches Jumia) */}
-        <div className="col-span-full mb-2">
-          <div className="bg-gray-50 border rounded p-3">
-            <div className="text-xs text-gray-500">CART SUMMARY</div>
-            <div className="flex items-center justify-between mt-1">
-              <div className="text-sm text-gray-700 font-medium">Subtotal</div>
-              <div className="text-sm font-semibold">{formatPrice(subtotal)}</div>
-            </div>
-          </div>
-        </div>
+    <div className="container mx-auto py-24 px-4">
+      <div className="max-w-6xl bg-white rounded-lg shadow-md overflow-hidden grid grid-cols-1 lg:grid-cols-2 text-ash">
+        {/* LEFT: Shipping / Form */}
+        <div className="p-8">
+          <h1 className="text-2xl font-semibold mb-6">Checkout</h1>
 
-        {/* Left Side - Form */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Checkout</h2>
-          <div className="flex gap-4 mb-6">
-            <button className="flex-1 border border-blue-500 text-blue-500 py-2 rounded-lg">Delivery</button>
-            <button className="flex-1 border py-2 rounded-lg">Pick up</button>
+          {/* Delivery / Pickup toggles */}
+          <div className="mb-6 ring-1 ring-gold2/50 bg-gold2/20 rounded-sm py-0.5 text-center font-medium">
+            Pickup Details
           </div>
 
-          <form className="space-y-4">
-            <input type="text" placeholder="Full name" className="w-full border p-3 rounded-lg" />
-            <input type="email" placeholder="Email address" className="w-full border p-3 rounded-lg" />
-            <input type="tel" placeholder="Phone number" className="w-full border p-3 rounded-lg" />
-
-            <select className="w-full border p-3 rounded-lg">
-              <option>Choose country</option>
-              <option>Nigeria</option>
-              <option>USA</option>
-            </select>
-
-            <div className="grid grid-cols-2 gap-4">
-              <input type="text" placeholder="City" className="border p-3 rounded-lg" />
-              <input type="text" placeholder="State" className="border p-3 rounded-lg" />
+          <div className="space-y-4">
+            {/* Simple form fields without actual form handling for now */}
+            <div className='space-y-1'>
+              <label className="block font-semibold text-sm ">Full name <span className="text-red-600 text-lg">*</span></label>
+              <input className="input_field" placeholder="Enter full name" required/>
             </div>
 
-            <input type="text" placeholder="ZIP Code" className="w-full border p-3 rounded-lg" />
+            <div>
+              <label className="block font-semibold text-sm">Email address <span className="text-red-600 text-lg">*</span></label>
+              <input className="input_field" placeholder="Enter email address" required/>
+            </div>  
 
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="terms" />
+            <div>
+              <label className="block font-semibold text-sm">Phone number <span className="text-red-600 text-lg">*</span></label>
+              <input className="input_field" placeholder="Enter phone number" required/>
+            </div>
+            
+            <div>
+              <label className="block font-semibold text-sm">Country</label>
+              <select className="input_field">
+                <option>Choose country</option>
+                <option>Nigeria</option>
+                <option>USA</option>
+              </select>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <input id="terms" type="checkbox" className="mt-1" />
               <label htmlFor="terms" className="text-sm">I have read and agree to the Terms and Conditions.</label>
             </div>
-          </form>
+          </div>
         </div>
 
-        {/* Right Side - Summary */}
-        <div className="lg:ps-6">
-          <h3 className="text-lg font-semibold mb-4">Review your cart</h3>
+        {/* RIGHT: Review panel */}
+        <aside className="p-8 border-l">
+          <h2 className="text-lg font-medium mb-4">Review your cart</h2>
 
-          <div className="space-y-4 mb-4">
+          <div className="space-y-4 mb-6">
+            {/* Show each cart item with small thumbnail, title, qty and price */}
             {cartItemList.length === 0 ? (
               <div className="text-sm text-gray-500">No items in cart.</div>
             ) : (
-              cartItemList.map(ci => (
-                <div key={ci.id} className="flex justify-between">
-                  <span>Item</span>
-                  <span>Qty: {ci.qty}</span>
-                </div>
-              ))
+              cartItemList.map(ci => {
+                // resolve item details (fallback to id string). Keep this simple for now.
+                const id = String(ci.id);
+                const found = (ci.type === 'plan')
+                  ? plans?.find(p => String(p.slug) === id)
+                  : products?.find(p => String(p._id || p.id) === id) || plans?.find(p => String(p.slug) === id);
+
+                const title = found ? (found.name || found.title) : id;
+                const price = found ? (found.price || 0) : 0;
+
+                return (
+                  <div key={ci.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 bg-gray-100 rounded flex items-center justify-center"> 
+                        {/* placeholder thumbnail */}
+                        <img src={found?.image} alt={title} className="object-cover w-full h-full rounded" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">{title}</div>
+                        <div className="text-xs text-gray-500">{ci.qty}x</div>
+                      </div>
+                    </div>
+
+                    <div className="text-sm font-semibold">{formatPrice(price)}</div>
+                  </div>
+                );
+              })
             )}
           </div>
 
-          {/* Discount */}
-          <div className="mt-4 flex gap-2">
-            <input type="text" placeholder="Discount code" className="flex-1 border p-2 rounded-lg" />
-            <button className="bg-gray-800 text-white px-4 rounded-lg">Apply</button>
+          {/* Totals block */}
+          <div className="space-y-2 mb-6 text-sm">
+            <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+            <div className="flex justify-between"><span>Shipping</span><span>{formatPrice(5000)}</span></div>
+            <div className="flex justify-between text-green-600"><span>Discount</span><span>-{formatPrice(10000)}</span></div>
+            <div className="flex justify-between font-semibold text-lg"><span>Total</span><span>{formatPrice(subtotal - 5000 - 10000)}</span></div>
           </div>
 
-          {/* Totals */}
-          <div className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>{formatPrice(subtotal)}</span>
+          <button className="w-full bg-gold2 text-white py-3 rounded-md mb-4">Pay Now</button>
+
+          <div className="text-xs text-gray-500">
+            <div className="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c2.21 0 4-1.79 4-4V5a4 4 0 10-8 0v2c0 2.21 1.79 4 4 4z"/></svg>
+              Secure Checkout · SSL Encrypted
             </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>$0.00</span>
-            </div>
-            <div className="flex justify-between font-semibold text-lg">
-              <span>Total</span>
-              <span>{formatPrice(subtotal)}</span>
-            </div>
+            <div className="text-gray-400">Ensuring your financial and personal details are secure during every transaction.</div>
           </div>
-
-          {/* Pay Now */}
-          <button className="mt-6 w-full bg-gold2 text-white py-3 rounded-lg">Pay Now</button>
-
-          <p className="text-xs text-gray-500 mt-2 text-center">Secure Checkout · SSL Encrypted</p>
-
-          {/* Mobile bottom pay bar (Jumia-like) */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 lg:hidden">
-            <div className="flex items-center gap-3">
-              <a
-                href="tel:+234000000000"
-                aria-label="Call support"
-                className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h1.6a1 1 0 01.96.73l.7 2.5a1 1 0 01-.28.95L6.4 9.4a16 16 0 007.2 7.2l2.6-1.6a1 1 0 01.95-.28l2.5.7A1 1 0 0121 19.4V21a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
-                </svg>
-              </a>
-
-              <button className="flex-1 bg-[#ff7a00] text-white px-4 py-3 rounded-lg flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 21a1 1 0 11-2 0 1 1 0 012 0zm-8 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                  </svg>
-                  <span>Pay Now</span>
-                </span>
-                <span className="font-semibold">{formatPrice(subtotal)}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

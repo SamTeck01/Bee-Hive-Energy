@@ -5,6 +5,7 @@ import { ProductsContext } from './ProductsContext.jsx';
 import { useLoading } from './LoadingContext.jsx';
 import { Link } from 'react-router-dom';
 import Bin from '../assets/bin.svg';
+import { Phone } from 'lucide-react';
 
 const CartPage = () => {
   const {
@@ -104,34 +105,68 @@ const CartPage = () => {
 
               <div className="divide-y">
                 {cartItemList.map(item => (
-                  <div key={ item._id } className="p-6 flex flex-row justify-between items-center">
+                  <div key={ item._id } className="p-4 gap-0">
 
-                    <div className='flex items-center gap-3 flex-row'>
-                      <img
-                        src={item.image || '/placeholder-image.jpg'}
-                        alt={item.name || item.title}
-                        className="w-full md:w-28 h-40 md:h-20 object-cover rounded mb-3 md:mb-0"
-                      />
+                    <div className='grid grid-cols-2 items-center'>
+                      <div className='flex items-center gap-3 flex-row w-full me-1'>
+                        <img
+                          src={item.image || '/placeholder-image.jpg'}
+                          alt={item.name || item.title}
+                          className="md:w-28 h-20 w-20 md:h-20 object-cover rounded mb-3 md:mb-0"
+                        />
 
-                      <div className="flex justify-between flex-col text-left ">
-                        <h3 className="font-semibold text-gray-900">{item.name || item.title}</h3>
-                        <p className="text-sm text-gray-600">{item.itemType === 'plan' ? 'Plan' : 'Product'}</p>
-                        
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => deleteCartItem(item.cartId || item._id || item.id)}
-                          className="text-gold2 flex items-center gap-2 mt-2.5"
-                        >
-                          <img src={Bin} alt="Remove" className='h-5 w-5' />
-                          Remove
-                        </button>
+                        <div className="flex justify-between flex-col text-left ">
+                          <h3 className="font-semibold text-gray-900">{item.name || item.title}</h3>
+                          <p className="text-sm text-gray-600">{item.itemType === 'plan' ? 'Plan' : 'Product'}</p>
+                          
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => deleteCartItem(item.cartId || item._id || item.id)}
+                            className="text-gold2 hidden md:flex items-center gap-2 mt-2.5 "
+                          >
+                            <img src={Bin} alt="Remove" className='h-5 w-5' />
+                            Remove
+                          </button>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className='flex items-end gap-4 flex-col'>
-                      <p className="text-lg font-semibold text-gold2 ">{formatPrice(item.price)}</p>
+                      <div className='flex items-end gap-4 flex-col '>
+                        <p className="text-lg font-semibold text-gold2 ">{formatPrice(item.price)}</p>
 
-                      {/* Button */}
+                        {/* Button */}
+                        <div className="md:flex items-center gap-3 hidden">
+                          <button
+                            onClick={() => removeFromCart(item.cartId || item._id || item.id)}
+                            className="w-8 h-8 rounded-md bg-gray-200 flex items-center justify-center text-gray-700"
+                            aria-label="Decrease quantity"
+                          >
+                            -
+                          </button>
+
+                          <span className="w-12 text-center font-medium">{item.quantity}</span>
+
+                          <button
+                            onClick={() => addToCart(item.cartId || item._id || item.id, item.itemType || (item.slug ? 'plan' : 'product'))}
+                            className="w-8 h-8 rounded-md bg-gold2 text-white flex items-center justify-center"
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>  
+
+                    {/* Action button on mobile */}
+                    <div className="flex justify-between md:hidden">
+                      <button
+                        onClick={() => deleteCartItem(item.cartId || item._id || item.id)}
+                        className="text-gold2 flex items-center gap-2 "
+                      >
+                        <img src={Bin} alt="Remove" className='h-5 w-5' />
+                        Remove
+                      </button>
+
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => removeFromCart(item.cartId || item._id || item.id)}
@@ -151,15 +186,17 @@ const CartPage = () => {
                           +
                         </button>
                       </div>
-
                     </div>
 
                   </div>
                 ))}
               </div>
 
-              <div className="p-6 border-t text-right">
-                <button onClick={clearCart} className="text-red-600 hover:text-red-700 text-sm">Clear Cart</button>
+              <div className="p-6 border-t flex justify-end">
+                <button onClick={clearCart} className="text-red-600 hover:text-red-700 text-sm flexCenter gap-1 flex-row  w-fit">
+                  <div className="w-5 h-5"><svg id="Слой_1" version="1.1" viewBox="0 0 40 40"  xmlns="http://www.w3.org/2000/svg" fill="#dc2626 "><g><path d="M28,40H11.8c-3.3,0-5.9-2.7-5.9-5.9V16c0-0.6,0.4-1,1-1s1,0.4,1,1v18.1c0,2.2,1.8,3.9,3.9,3.9H28c2.2,0,3.9-1.8,3.9-3.9V16   c0-0.6,0.4-1,1-1s1,0.4,1,1v18.1C33.9,37.3,31.2,40,28,40z"/></g><g><path d="M33.3,4.9h-7.6C25.2,2.1,22.8,0,19.9,0s-5.3,2.1-5.8,4.9H6.5c-2.3,0-4.1,1.8-4.1,4.1S4.2,13,6.5,13h26.9   c2.3,0,4.1-1.8,4.1-4.1S35.6,4.9,33.3,4.9z M19.9,2c1.8,0,3.3,1.2,3.7,2.9h-7.5C16.6,3.2,18.1,2,19.9,2z M33.3,11H6.5   c-1.1,0-2.1-0.9-2.1-2.1c0-1.1,0.9-2.1,2.1-2.1h26.9c1.1,0,2.1,0.9,2.1,2.1C35.4,10.1,34.5,11,33.3,11z"/></g><g><path d="M12.9,35.1c-0.6,0-1-0.4-1-1V17.4c0-0.6,0.4-1,1-1s1,0.4,1,1v16.7C13.9,34.6,13.4,35.1,12.9,35.1z"/></g><g><path d="M26.9,35.1c-0.6,0-1-0.4-1-1V17.4c0-0.6,0.4-1,1-1s1,0.4,1,1v16.7C27.9,34.6,27.4,35.1,26.9,35.1z"/></g><g><path d="M19.9,35.1c-0.6,0-1-0.4-1-1V17.4c0-0.6,0.4-1,1-1s1,0.4,1,1v16.7C20.9,34.6,20.4,35.1,19.9,35.1z"/></g></svg></div>
+                  Clear Cart
+                </button>
               </div>
             </div>
           </div>
@@ -195,17 +232,15 @@ const CartPage = () => {
         </div>
 
           {/* Mobile bottom bar (Jumia-like) */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 md:hidden">
-          <div className="flex items-center gap-3">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 md:hidden mx-auto">
+          <div className="flex items-center gap-4 container mx-auto">
             {/* Call/Contact anchor on the left - replace number with your support line */}
             <a
-              href="tel:+234000000000"
+              href="tel:+2349023036748"
               aria-label="Call support"
               className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h1.6a1 1 0 01.96.73l.7 2.5a1 1 0 01-.28.95L6.4 9.4a16 16 0 007.2 7.2l2.6-1.6a1 1 0 01.95-.28l2.5.7A1 1 0 0121 19.4V21a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
-              </svg>
+              <Phone size={25} />
             </a>
 
             {/* Big Checkout button showing subtotal and item count */}

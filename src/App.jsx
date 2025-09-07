@@ -24,11 +24,13 @@ import { ProductsProvider } from './components/ProductsContext.jsx';
 import { CartProvider } from './components/CartContext.jsx';
 import { ProductsCategoryProvider } from './components/ProductCategoryContext.jsx';
 import { LoadingProvider } from './components/LoadingContext.jsx';
+import FullPageLoader from './components/FullPageLoader.jsx';
 
 export default function App() {
   return (
     <main className="text-tertiary">
       <LoadingProvider>
+  <FullPageLoader />
         <CartProvider>
           <WishlistProvider>
             <ProductsCategoryProvider>

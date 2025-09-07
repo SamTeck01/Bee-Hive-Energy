@@ -75,6 +75,9 @@ html{
     @apply text-gold relative flex-1 after:w-full after:h-[1px] after:bg-gold after:absolute after:-bottom-3 after:right-0;
   }
   
+  .input_field {
+    @apply w-full border border-ash/50 bg-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gold2/40 focus:border-transparent transition;
+  }
   .h1 {
     @apply text-[48px] leading-tight md:text-[72px] md:leading-[1.3] mb-8 font-bold;
   }

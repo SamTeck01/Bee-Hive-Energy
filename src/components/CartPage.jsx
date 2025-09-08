@@ -1,5 +1,5 @@
 import { useCart } from './CartContext.jsx';
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { PlansContext } from './PlansContext.jsx';
 import { ProductsContext } from './ProductsContext.jsx';
 import { useLoading } from './LoadingContext.jsx';
@@ -57,6 +57,9 @@ const CartPage = () => {
       return total + price * (Number(item.quantity) || 0);
     }, 0);
   };
+
+  // Dummy fulfillment selector state (visual only). Does NOT persist or affect totals.
+  const [fulfillment, setFulfillment] = useState('delivery');
 
   console.log('Cart Items:', cartItemList);
 
@@ -212,9 +215,26 @@ const CartPage = () => {
                   <span className="font-semibold">{formatPrice(getCartTotal())}</span>
                 </div>
 
+                {/* Fulfillment selector */}
+                <div className="">
+                  <div className="text-sm text-gray-600 mb-2">Delivery Details</div>
+                  <div className="flex gap-2">
+                    {/* <button
+                      onClick={() => setFulfillment('delivery')}
+                      className={`px-3 py-2 rounded-md border ${fulfillment === 'delivery' ? 'border-gold2 bg-gold2/10' : 'border-gray-200'}`}>
+                      Delivery
+                    </button> */}
+                    <button
+                      onClick={() => setFulfillment('pickup')}
+                      className={`px-3 py-2 rounded-md border border-gold2 bg-gold2/10`}>
+                      <input type="radio" className='text-gold2 bg-gold2' checked /> Pickup
+                    </button>
+                  </div>
+                </div>
+
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span className="text-green-600">Free</span>
+                  <span className="font-semibold">{fulfillment === 'pickup' ? 'Free' : 'Calculated at checkout'}</span>
                 </div>
 
                 <div className="border-t pt-3">

@@ -2,6 +2,8 @@ import { useCart } from './CartContext.jsx';
 import { useMemo, useContext } from 'react';
 import { PlansContext } from './PlansContext.jsx';
 import { ProductsContext } from './ProductsContext.jsx';
+import { Link } from 'react-router-dom';
+import { MoveLeft } from 'lucide-react';
 
 // Checkout page — simplified and heavily commented so it's easy to follow
 export default function Checkout() {
@@ -68,16 +70,19 @@ export default function Checkout() {
 
   // 6) Render: form on the left, cart summary on the right. We show a simple
   //    persistent 'CART SUMMARY' at the top with the computed subtotal.
+  
+
   return (
     <div className="container mx-auto py-24 px-4">
+      <Link to={'/cart'} className='text-ash flex flex-row gap-2 mb-3 hover:text-gold2 w-fit'><MoveLeft /> Back to Cart</Link>
       <div className="max-w-6xl bg-white rounded-lg shadow-md overflow-hidden grid grid-cols-1 lg:grid-cols-2 text-ash">
         {/* LEFT: Shipping / Form */}
         <div className="p-8">
           <h1 className="text-2xl font-semibold mb-6">Checkout</h1>
 
           {/* Delivery / Pickup toggles */}
-          <div className="mb-6 ring-1 ring-gold2/50 bg-gold2/20 rounded-sm py-0.5 text-center font-medium">
-            Pickup Details
+          <div className="mb-6 ring-1 ring-gold2/50 bg-gold2/10 rounded-sm py-0.5 text-center font-medium">
+            Pickup
           </div>
 
           <div className="space-y-4">
@@ -155,19 +160,19 @@ export default function Checkout() {
           {/* Totals block */}
           <div className="space-y-2 mb-6 text-sm">
             <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-            <div className="flex justify-between"><span>Shipping</span><span>{formatPrice(5000)}</span></div>
+            <div className="flex justify-between"><span>Shipping</span><span>Free</span></div>
             <div className="flex justify-between text-green-600"><span>Discount</span><span>-{formatPrice(10000)}</span></div>
             <div className="flex justify-between font-semibold text-lg"><span>Total</span><span>{formatPrice(subtotal - 5000 - 10000)}</span></div>
           </div>
 
           <button className="w-full bg-gold2 text-white py-3 rounded-md mb-4">Pay Now</button>
 
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-ash">
             <div className="flex items-center gap-2 mb-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c2.21 0 4-1.79 4-4V5a4 4 0 10-8 0v2c0 2.21 1.79 4 4 4z"/></svg>
               Secure Checkout · SSL Encrypted
             </div>
-            <div className="text-gray-400">Ensuring your financial and personal details are secure during every transaction.</div>
+            <div className="text-ash">Ensuring your financial and personal details are secure during every transaction.</div>
           </div>
         </aside>
       </div>

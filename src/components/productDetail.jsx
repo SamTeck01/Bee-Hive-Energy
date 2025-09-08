@@ -1,6 +1,6 @@
  // src/pages/ProductPage.jsx
 import { useParams, Link } from 'react-router-dom';
-import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2 } from 'lucide-react';
+import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2, Phone } from 'lucide-react';
 import SendWhatsAppMessage from './SendWhatsappMessage';
 import { HashLink } from 'react-router-hash-link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -188,7 +188,7 @@ export default function ProductPage() {
                 ...product,
                 id: product._id,
                 type: 'product',
-              }} onToast={triggerToast} classs={'md:flex hidden w-full'} />
+              }} onToast={triggerToast} className={'md:flex hidden w-full'} />
 
               <button 
                 onClick={() => SendWhatsAppMessage(`Hello, I'm interested in the ${product.name} plan`)} 
@@ -273,6 +273,27 @@ export default function ProductPage() {
         </div>
       
       </div>
+        {/* Mobile bottom bar: phone + add to cart (mobile only) */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 md:hidden mx-auto">
+          <div className="flex items-center gap-4 container mx-auto">
+            <a
+              href="tel:+2349023036748"
+              aria-label="Call support"
+              className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow"
+            >
+              <Phone size={25} />
+            </a>
+
+            {/* Mobile Add to Cart button */}
+            <div className="flex-1">
+              <AddToCartButton
+                item={{ ...product, id: product._id, type: 'product' }}
+                onToast={triggerToast}
+                className="w-full"
+              />
+            </div>
+          </div>
+        </div>
     </section>
   );
 }

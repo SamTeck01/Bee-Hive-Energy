@@ -4,49 +4,88 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 
-const AddToCartButton = ({ item, classs, onToast }) => {
-  const { addToCart, getItemQuantity } = useCart();
+const AddToCartButton = ({ item, className = '', onToast }) => {
+  const { addToCart, removeFromCart, getItemQuantity } = useCart();
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  console.log(classs);
+
   if (!item) return null;
 
   const itemId = String(item.id || item.slug || '');
   const itemType = item.type || (item.slug ? 'plan' : 'product');
   if (!itemId) return null;
 
-  const quantity = getItemQuantity ? getItemQuantity(itemId) : 0;
+  // read the actual quantity from cart context
+  const quantity = typeof getItemQuantity === 'function' ? getItemQuantity(itemId) : 0;
+
+  const doToast = (msg = 'Added to cart') => {
+    setShowToast(true);
+    if (onToast) onToast(msg);
+    setTimeout(() => setShowToast(false), 2600);
+  };
 
   const handleAdd = async (e) => {
-    e && e.preventDefault && e.preventDefault();
+    e?.preventDefault();
     if (loading) return;
     try {
       setLoading(true);
-      // optimistic update
-  addToCart(itemId, itemType);
-      setShowToast(true);
-      if (onToast) onToast('Added to cart');
-      setTimeout(() => setShowToast(false), 2600);
+      // optimistic update via context
+      addToCart(itemId, itemType);
+      doToast();
     } catch (err) {
-      // ideally rollback optimistic update here
       console.error('Add to cart failed', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleIncrease = (e) => {
+    e.stopPropagation();
+    addToCart(itemId, itemType);
+    doToast();
+  };
+
+  const handleDecrease = (e) => {
+    e.stopPropagation();
+    removeFromCart(itemId);
+  };
+
   return (
-    <div className="relative w-full">
-      <button
-        onClick={handleAdd}
-        aria-label={`Add ${item.name || item.title || itemId} to cart`}
-        disabled={loading}
-        className={`bg-gold2 hover:bg-gold2/80 text-white font-medium px-6 py-3 rounded-md flex justify-between items-center gap-2 mt-3 transition flex-row ${classs}`}
-      >
-        <ShoppingCart size={16}/>
-        <span>{loading ? 'Adding...' : (quantity > 0 ? `In Cart (${quantity})` : 'Add to cart')}</span>
-        <div/>
-      </button>
+    <div className={`relative w-full ${className}`}>
+      {/* If not in cart: show primary add button */}
+      {quantity <= 0 ? (
+        <button
+          onClick={handleAdd}
+          aria-label={`Add ${item.name || item.title || itemId} to cart`}
+          disabled={loading}
+          className={`bg-gold2 hover:bg-gold2/80 text-white font-medium px-6 py-3 rounded-md flex items-center justify-between transition w-full`}
+        >
+          <ShoppingCart size={16} />
+          <span>{loading ? 'Adding...' : 'Add to cart'}</span>
+          <div/>
+        </button>
+      ) : (
+        // When item is in cart show compact quantity controls
+        <div className="flex items-center justify-between gap-3 w-full ">
+          <button
+            onClick={handleDecrease}
+            aria-label="Decrease quantity"
+            className="px-5 py-3 text-lg rounded-md bg-gray-200 flex items-center justify-center text-gray-700"
+          >
+            -
+          </button>
+
+          <div className="px-3 text-center text-lg font-medium">{quantity}</div>
+
+          <button
+            onClick={handleIncrease}
+            aria-label="Increase quantity"
+            className="px-5 py-3 rounded-md bg-gold2 text-white flex items-center justify-center"
+          >
+            +
+          </button>
+        </div>
+      )}
 
       <AnimatePresence>
         {showToast && (
@@ -67,61 +106,8 @@ const AddToCartButton = ({ item, classs, onToast }) => {
 
 AddToCartButton.propTypes = {
   item: PropTypes.object.isRequired,
-  classs: PropTypes.string,
+  className: PropTypes.string,
   onToast: PropTypes.func,
 };
 
 export default AddToCartButton;
-
-
-// import PropTypes from 'prop-types';
-// import { useCart } from './CartContext';
-
-// const AddToCartButton = ({ item, className = '' }) => {
-//   const { addToCart, cartItems } = useCart();
-  
-//   // Handle undefined item
-//   if (!item) {
-//     return null;
-//   }
-  
-//   // Use slug for plans, id for products
-//   const itemId = item.slug || item.id;
-//   if (!itemId) {
-//     return null;
-//   }
-  
-//   const isInCart = cartItems.some(cartItem => 
-//     (cartItem.slug || cartItem.id) === itemId
-//   );
-  
-//   const handleAddToCart = () => {
-//     if (item && itemId) {
-//       addToCart(item);
-//     }
-//   };
-
-//   return (
-//     <button
-//       onClick={handleAddToCart}
-//       className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-//         isInCart
-//           ? 'bg-green-600 text-white hover:bg-green-700'
-//           : 'bg-blue-600 text-white hover:bg-blue-700'
-//       } ${className}`}
-//     >
-//       {isInCart ? 'Added to Cart' : 'Add to Cart'}
-//     </button>
-//   );
-// };
-
-// AddToCartButton.propTypes = {
-//   item: PropTypes.shape({
-//     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-//     slug: PropTypes.string,
-//     price: PropTypes.number.isRequired,
-//   }).isRequired,
-//   className: PropTypes.string,
-// };
-
-// export default AddToCartButton;

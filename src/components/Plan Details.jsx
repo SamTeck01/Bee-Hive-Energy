@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { PlansContext } from './PlansContext.jsx';
-import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2 } from 'lucide-react';
+import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2, Phone } from 'lucide-react';
 import SendWhatsAppMessage from './SendWhatsappMessage';
 import AddToCartButton from './AddToCartButton';
 
@@ -110,6 +110,27 @@ const PlanDetails = () => {
         </nav>
 
         <div className="md:bg-white bg-transparent rounded-lg grid grid-cols-1 gap-2 md:gap-2 md:w-[75%] w-full">
+      {/* Mobile bottom bar: phone + add to cart (mobile only) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 md:hidden mx-auto">
+        <div className="flex items-center gap-4 container mx-auto">
+          <a
+            href="tel:+2349023036748"
+            aria-label="Call support"
+            className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow"
+          >
+            <Phone size={25} />
+          </a>
+
+          {/* Mobile Add to Cart button */}
+          <div className="flex-1">
+            <AddToCartButton
+              item={{ ...plan, id: plan.slug, type: 'plan' }}
+              onToast={triggerToast}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
 
           <div className='flex md:flex-row flex-col gap-2 md:gap-10'>
             {/* Image and Add to Cart */}
@@ -175,7 +196,7 @@ const PlanDetails = () => {
                   ...plan,
                   id: plan.slug,
                   type: 'plan',
-                }} onToast={triggerToast} />
+                }} onToast={triggerToast} className={'md:flex hidden w-full'}/>
               </div>
 
               <button 

@@ -3,9 +3,9 @@ import { useContext, useMemo, useState } from 'react';
 import { PlansContext } from './PlansContext.jsx';
 import { ProductsContext } from './ProductsContext.jsx';
 import { useLoading } from './LoadingContext.jsx';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Bin from '../assets/bin.svg';
-import { Phone } from 'lucide-react';
+import { MoveLeft, Phone } from 'lucide-react';
 
 const CartPage = () => {
   const {
@@ -31,6 +31,8 @@ const CartPage = () => {
       currency: 'NGN',
     }).format(numericPrice || 0);
   };
+
+  const navigate = useNavigate();
 
   const cartItemList = useMemo(() => Object.entries(cartItems).map(([itemId, stored]) => {
     const key = String(itemId);
@@ -61,8 +63,6 @@ const CartPage = () => {
   // Dummy fulfillment selector state (visual only). Does NOT persist or affect totals.
   const [fulfillment, setFulfillment] = useState('delivery');
 
-  console.log('Cart Items:', cartItemList);
-
   if (cartItemList.length === 0) {
     return (
       <section className="px-4 py-24">
@@ -90,7 +90,9 @@ const CartPage = () => {
 
   return (
     <section className="px-0 py-24">
-        <div className="container mx-auto">
+      <div className="container mx-auto">
+        <Link onClick={() => navigate(-1)} className='text-ash flex flex-row gap-2 mb-3 hover:text-gold2 w-fit px-4'><MoveLeft /> Back to Shopping</Link>
+
         {/* Persistent cart summary bar (matches Jumia mobile screenshot) */}
         <div className="">
           <div className="text-sm text-gray-500 px-4">CART SUMMARY</div>

@@ -186,7 +186,7 @@ const NewHeader = () => {
               <HashLink smooth to="/cart" className="text-black relative">
                 <ShoppingCart size={22} />
                 {totalCart > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gold2 text-white text-sm font-semibold rounded-full w-5 h-5 flex items-center justify-center">{totalCart}</span>
+                  <span className="absolute -top-2 -right-2 bg-gold2 text-white text-sm font-medium rounded-full px-[6px] flexCenter">{totalCart}</span>
                 )}
               </HashLink>
 
@@ -208,45 +208,6 @@ const NewHeader = () => {
             
           </div>
 
-          {/* {isOpen && (
-            <motion.div
-              className="md:hidden mt-4 -mx-4 -mb-3 px-7 p-4 shadow-md"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <nav className="flex flex-col space-y-4">
-                <HashLink smooth to="/#home" onClick={() => setIsOpen(false)} className="text-primary-900 hover:text-gold2 font-medium transition duration-300">
-                  <span className="inline-flex items-center gap-2"><Home size={18} />Home</span>
-                </HashLink>
-                <HashLink smooth to="/plans" onClick={() => setIsOpen(false)} className="text-primary-900 hover:text-gold2 font-medium transition duration-300">
-                  <span className="inline-flex items-center gap-2"><Package size={18} />Plans</span>
-                </HashLink>
-                <HashLink smooth to="/products" onClick={() => setIsOpen(false)} className="text-primary-900 hover:text-gold2 font-medium transition duration-300">
-                  <span className="inline-flex items-center gap-2"><Box size={18} />Products</span>
-                </HashLink>
-                <HashLink smooth to="/#services" onClick={() => setIsOpen(false)} className="text-primary-900 hover:text-gold2 font-medium transition duration-300">
-                  <span className="inline-flex items-center gap-2"><Wrench size={18} />Services</span>
-                </HashLink>
-                <HashLink smooth to="/#contact" onClick={() => setIsOpen(false)} className="text-primary-900 hover:text-gold2 font-medium transition duration-300">
-                  <span className="inline-flex items-center gap-2"><Phone size={18} />Contact</span>
-                </HashLink>
-                <HashLink smooth to="/wishlist" className="text-primary-900 hover:text-gold2 font-medium transition duration-300">
-                  <span className="inline-flex items-center gap-2"><Heart size={18} />Wishlist</span>
-                </HashLink>
-                <HashLink smooth to='/gallery' onClick={() => setIsOpen(false)} className="text-primary-900 hover:text-gold2 font-medium transition duration-300">
-                  <span className="inline-flex items-center gap-2"><Box size={18} />Gallery</span>
-                </HashLink>
-                <button
-                  onClick={() => SendWhatsAppMessage('Hi! I’d like to learn more about your services and discuss how they might fit my business needs. Can we chat about the features and pricing? Thanks!')}
-                  className={`${scrolled ? 'bg-[#E49900] hover:bg-transparent hover:border-gold hover:border-2 hover:text-gold text-white' : 'bg-transparent text-black'} px-6 py-2 rounded-md font-medium transition duration-300 w-full flexCenter gap-2`}
-                >
-                  <MessageCircleDashed/> <span>Chat with us</span>
-                </button>
-              </nav>
-            </motion.div>
-          )} */}
         </div>
 
         {/* Mobile Search */}

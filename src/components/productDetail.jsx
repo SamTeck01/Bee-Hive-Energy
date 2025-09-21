@@ -96,8 +96,8 @@ export default function ProductPage() {
             className="fixed top-16 left-auto bg-green-600 text-white px-6 py-3 rounded shadow-lg z-50 w-[94.5%] md:w-[80%] flex items-center justify-between"
           >
             {toastMessage}
-            <HashLink smooth to="/wishlist" className="text-white underline ml-2">
-              View Wishlist
+            <HashLink smooth to="/cart" className="text-white underline ml-2">
+              View Cart
             </HashLink>
           </motion.div>
         )}
@@ -123,7 +123,7 @@ export default function ProductPage() {
 
           <div className='flex md:flex-row flex-col gap-2 md:gap-10'>
             {/* Image */}
-            <div className='md:w-[280px] w-full flexCenter shrink-0 md:flex md:items-start flex-col bg-white md:bg-transparent p-3 rounded-lg shadow-md md:shadow-none'>
+            <div className='md:w-[280px] h-[400px] w-full flexCenter shrink-0 md:flex md:items-start flex-col bg-white md:bg-transparent p-3 rounded-lg shadow-md md:shadow-none'>
               <div>
                 <img 
                   src={product.image} 

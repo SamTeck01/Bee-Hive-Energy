@@ -87,8 +87,8 @@ const PlansPage = () => {
           className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
         >
           {toastMessage}
-          <HashLink smooth to="/wishlist" className="text-white underline ml-2">
-            View Wishlist
+          <HashLink smooth to="/cart" className="text-white underline ml-2">
+            View Cart
           </HashLink>
         </motion.div>
       )}

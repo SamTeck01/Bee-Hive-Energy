@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react'; 
-import plans from '../assets/all_plans';
 import { useState, useContext } from 'react';
 import { HashLink } from 'react-router-hash-link';
 import { PlansContext } from './PlansContext';
@@ -14,7 +13,7 @@ const PlansSection = () => {
   const { plans: contextPlans, error, retryFetch, isLoading } = useContext(PlansContext);
 
   // Use context plans if available, otherwise fallback to static plans
-  const displayPlans = contextPlans.length > 0 ? contextPlans : plans;
+  const displayPlans = contextPlans;
 
   const triggerToast = (message) => {
     setToastMessage(message);

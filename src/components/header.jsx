@@ -66,7 +66,7 @@ const NewHeader = () => {
         <div className="absolute left-0 top-0 w-full h-1 z-50">
           <div className={`h-1 bg-[#e49900] transition-all duration-300 ${isLoading ? 'w-full opacity-100' : 'w-0 opacity-0'}`} />
         </div>
-        <div className="container mx-auto px-4 md:p-0">
+        <div className="container mx-auto px-4">
           <div className="flex justify-between items-center relative">
 
             <div className="flex flex-row">
@@ -172,12 +172,6 @@ const NewHeader = () => {
             </div>
 
             <div className="md:hidden flex items-center space-x-5">
-              {/* <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-primary-900 focus:outline-none"
-              >
-                {isOpen ? <X size={32} /> : <Menu size={32} />}
-                </button> */}
 
               <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="text-black">
                 {isSearchOpen ? <SearchX size={22} /> : <SearchIcon size={22} />} 

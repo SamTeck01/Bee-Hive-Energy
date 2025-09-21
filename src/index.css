@@ -9,6 +9,12 @@
   box-sizing: border-box;
   font-family: 'Urbanist', sans-serif;
 }
+
+:root{
+  --brand: #E49900;
+  --brand-500: #E49900;
+  --brand-600: #cc8500;
+}
 .linearGradient {
   background: linear-gradient(180deg, #fde1ff 0%, #e1ffea22 60%);
 }
@@ -63,7 +69,7 @@ html{
 }
 
 .custom-bullet-active {
-  background-color: #FFA500; /* full orange */
+  background-color: var(--brand-500); /* full brand */
   transform: scale(1.4);
   box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.4);
 }
@@ -113,6 +119,12 @@ html{
   .btn_dark_rounded { 
     @apply  medium-15 border border-green-90 bg-green-90 px-7 py-3 text-white transition-all hover:bg-black rounded-full
   }
+
+  .btn_brand {
+    @apply bg-[var(--brand-500)] text-white px-6 py-3 rounded-full font-medium;
+  }
+
+  .text-brand { color: var(--brand-500); }
   .btn_dark_outline { 
     @apply  medium-15 border border-green-90 bg-transparent px-7 py-3 text-green-90 transition-all hover:bg-black hover:text-white rounded-full
   }

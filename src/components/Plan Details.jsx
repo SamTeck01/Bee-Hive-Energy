@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { PlansContext } from './PlansContext.jsx';
-import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2, Phone } from 'lucide-react';
+import { Star, ShoppingCart, AlertCircle, Info, DollarSign, ChevronRight, ChevronDown, ChevronUp, Heart, Share2, Phone, RefreshCw } from 'lucide-react';
 import SendWhatsAppMessage from './SendWhatsappMessage';
 import AddToCartButton from './AddToCartButton';
 
@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWishlist } from './WishlistContext';
+import { PlanCardSkeleton } from './LoadingSkeleton.jsx';
+import PlanCard from './PlanCard.jsx';
 
 
 const PlanDetails = () => {
@@ -19,7 +21,7 @@ const PlanDetails = () => {
   const { planWishlist, togglePlanWishlist } = useWishlist();
   const [showToast, setShowToast] = useState(false);
 
-  const { plans } = useContext(PlansContext);
+  const { plans, error, retryFetch, isLoading } = useContext(PlansContext);
 
   const handleWishlistToggle = () => {
     if (!plan) return;
@@ -52,8 +54,94 @@ const PlanDetails = () => {
     }
   }, [plan]);
 
+  // Error state
+  if (error) {
+    return (
+      <section className="px-4 py-24">
+        <div className="container mx-auto">
+          <nav className="text-sm text-ash flex items-center mb-3 ms-2 space-x-2">
+            <Link to="/" className="hover:text-gold2">Home</Link>
+            <ChevronRight size={16} />
+            <Link to="/plans" className="hover:text-gold2">Plans</Link>
+            <ChevronRight size={16} />
+            <span className="text-black font-medium">Plan Details</span>
+          </nav>
+
+          <div className="flexCenter mt-12">
+            <div className="text-center max-w-md">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Unable to load plan details
+              </h3>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <button
+                onClick={retryFetch}
+                className="bg-gold2 text-white px-6 py-3 rounded-md hover:bg-gold2/90 transition-colors flex items-center gap-2 mx-auto"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <section className="px-4 py-24">
+        <div className="container mx-auto">
+          <nav className="text-sm text-ash flex items-center mb-3 ms-2 space-x-2">
+            <Link to="/" className="hover:text-gold2">Home</Link>
+            <ChevronRight size={16} />
+            <Link to="/plans" className="hover:text-gold2">Plans</Link>
+            <ChevronRight size={16} />
+            <span className="text-black font-medium">Loading...</span>
+          </nav>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <PlanCardSkeleton variant="default" className="w-full" />
+            <PlanCardSkeleton variant="default" className="w-full" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!plan) {
-    return <p className="text-center mt-20 text-red-500">Plan not found</p>;
+    return (
+      <section className="px-4 py-24">
+        <div className="container mx-auto">
+          <nav className="text-sm text-ash flex items-center mb-3 ms-2 space-x-2">
+            <Link to="/" className="hover:text-gold2">Home</Link>
+            <ChevronRight size={16} />
+            <Link to="/plans" className="hover:text-gold2">Plans</Link>
+            <ChevronRight size={16} />
+            <span className="text-black font-medium">Plan not found</span>
+          </nav>
+
+          <div className="flexCenter mt-12">
+            <div className="text-center max-w-md">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Plan not found
+              </h3>
+              <p className="text-gray-600 mb-6">
+                The plan you're looking for doesn't exist or may have been removed.
+              </p>
+              <Link
+                to="/plans"
+                className="bg-gold2 text-white px-6 py-3 rounded-md hover:bg-gold2/90 transition-colors inline-block"
+              >
+                Browse All Plans
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
   
   // Filter out the current plan to show others (from runtime plans)
@@ -257,21 +345,24 @@ const PlanDetails = () => {
           </div>
 
           {/* Similar Plans Section */}
-          <div className=" bg-white md:bg-transparent py-3 px-2 rounded-lg md:shadow-none shadow-md">
+          <div className="bg-white md:bg-transparent py-3 px-2 rounded-lg md:shadow-none shadow-md">
             <h2 className="text-lg font-medium text-black ps-1 mb-2">Customers Also Viewed</h2>
-            <div className='overflow-x-auto whitespace-nowrap scroll-smooth snap-x snap-mandatory pb-2' >
+            <div className='overflow-x-auto whitespace-nowrap scroll-smooth snap-x snap-mandatory pb-2'>
               <div className="flex gap-3">
                 {similarPlans.map((similar, idx) => (
-                  <HashLink smooth to={`/plans/${similar.slug}`}
-                    key={idx}
-                    className="w-52 shrink-0 rounded-lg hover:shadow-md transition bg-white inline-block snap-start"
-                  >
-                    <img src={similar.image} alt={similar.title} className="w-full h-40 object-cover rounded-t-md mb-1.5" />
-                    <div className='px-1 pb-1'>
-                      <h3 className="text-base font-medium text-gray-700">{similar.title}</h3>
-                      <p className="text-gold2 text-base font-semibold">{similar.price}</p>
-                    </div>
-                  </HashLink>
+                  <div key={idx} className="w-52 shrink-0 snap-start">
+                    <PlanCard
+                      plan={similar}
+                      index={idx}
+                      variant="compact"
+                      showRating={false}
+                      showWishlist={true}
+                      showShare={false}
+                      showFeatures={false}
+                      onToast={() => {}}
+                      className="w-full"
+                    />
+                  </div>
                 ))}
               </div>
             </div>

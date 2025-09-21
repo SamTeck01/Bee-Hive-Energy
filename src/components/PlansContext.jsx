@@ -1,37 +1,88 @@
 /* eslint-disable react/prop-types */
 // PlansContext.js
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useCallback } from 'react';
 import { useLoading } from './LoadingContext.jsx';
+import config from '../config/environment.js';
 
 export const PlansContext = createContext([]);
 
 export const PlansProvider = ({ children }) => {
   const [plans, setPlans] = useState([]);
-  // get loading setter from LoadingContext (safe fallback provided)
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const { setIsLoading } = useLoading();
 
-  useEffect(() => {
-    const fetchPlans = async () => {
-        try {
-            // signal loading
-            setIsLoading(true);
-            const response = await fetch("https://bee-energy-backend.onrender.com/api/plans");
-            const data = await response.json();
-            setPlans(data); // adjust if data format is different
-            console.log('Plans fetched successfully:', data);
-        } catch (error) {
-            console.error('Failed to fetch plans:', error, 'Reloading...');
-            fetchPlans();
-        }
-        finally {
-          setIsLoading(false);
-        }
-    };
+  const API_URL = `${config.API_URL}/plans`;
+
+  const fetchPlans = useCallback(async (isRetry = false) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch(API_URL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Add timeout
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Validate data structure
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format received from API');
+      }
+
+      setPlans(data);
+      setRetryCount(0); // Reset retry count on success
+      console.log('Plans fetched successfully:', data);
+    } catch (error) {
+      console.error('Failed to fetch plans:', error);
+      
+      const errorMessage = error.name === 'AbortError' 
+        ? 'Request timed out. Please check your connection.'
+        : error.message || 'Failed to fetch plans. Please try again.';
+      
+      setError(errorMessage);
+      
+      // Auto-retry logic (max 3 retries)
+      if (!isRetry && retryCount < 3) {
+        const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          fetchPlans(true);
+        }, delay);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [API_URL, setIsLoading, retryCount]);
+
+  const retryFetch = () => {
+    setRetryCount(0);
     fetchPlans();
-  }, [setIsLoading]);
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
+
+  const contextValue = {
+    plans,
+    setPlans,
+    error,
+    retryFetch,
+    isLoading: retryCount > 0
+  };
 
   return (
-    <PlansContext.Provider value={{ plans, setPlans }}>
+    <PlansContext.Provider value={contextValue}>
       {children}
     </PlansContext.Provider>
   );

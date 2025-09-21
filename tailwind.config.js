@@ -1,3 +1,5 @@
+import daisyui from 'daisyui';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -46,5 +48,21 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [daisyui],
+  // optional daisyUI config — adjust themes as needed
+  daisyui: {
+    themes: [
+      {
+        bee: {
+          primary: '#E49900',
+          secondary: '#f6f0e6',
+          accent: '#30AF5B',
+          neutral: '#222222',
+          'base-100': '#ffffff',
+        }
+      },
+      'light',
+      'dark'
+    ]
+  }
 }

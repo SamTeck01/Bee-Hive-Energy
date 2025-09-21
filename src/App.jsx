@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import Header from './components/header.jsx';
 import Footer from './pages/Footer.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 import Home from './components/Home.jsx';
 import PlansPage from './components/All Plans Page.jsx';
@@ -24,59 +25,60 @@ import { ProductsProvider } from './components/ProductsContext.jsx';
 import { CartProvider } from './components/CartContext.jsx';
 import { ProductsCategoryProvider } from './components/ProductCategoryContext.jsx';
 import { LoadingProvider } from './components/LoadingContext.jsx';
-import FullPageLoader from './components/FullPageLoader.jsx';
+// import FullPageLoader from './components/FullPageLoader.jsx';
 
 export default function App() {
   return (
-    <main className="text-tertiary">
-      <LoadingProvider>
-  <FullPageLoader />
-        <CartProvider>
-          <WishlistProvider>
-            <ProductsCategoryProvider>
-              <PlansProvider>
-                <ProductsProvider>
-                <BrowserRouter>
-                  <ScrollToTop />
-                  <Header />
+    <ErrorBoundary>
+      <main className="text-tertiary">
+        <LoadingProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <ProductsCategoryProvider>
+                <PlansProvider>
+                  <ProductsProvider>
+                    <BrowserRouter>
+                      <ScrollToTop />
+                      <Header />
 
-                  <Routes>
-                    {/* Home */}
-                    <Route path="/" element={<Home />} />
+                      <Routes>
+                        {/* Home */}
+                        <Route path="/" element={<Home />} />
 
-                    {/* Plans */}
-                    <Route path="/plans" element={<PlansPage />} />
-                    <Route path="/plans/:slug" element={<PlanDetails />} />
+                        {/* Plans */}
+                        <Route path="/plans" element={<PlansPage />} />
+                        <Route path="/plans/:slug" element={<PlanDetails />} />
 
-                    {/* Products */}
-                    <Route path="/products" element={<AllProductsPage />} />
-                    <Route path="/search" element={<SearchResults />} />
-                    <Route path="/products/:categoryId" element={<ProductCategoryPage />} />
-                    <Route path="/products/:categoryId/:productId" element={<ProductDetailsPage />} />
+                        {/* Products */}
+                        <Route path="/products" element={<AllProductsPage />} />
+                        <Route path="/search" element={<SearchResults />} />
+                        <Route path="/products/:categoryId" element={<ProductCategoryPage />} />
+                        <Route path="/products/:categoryId/:productId" element={<ProductDetailsPage />} />
 
-                    {/* Services */}
-                    <Route path="/inverter-solutions" element={<InverterSolutions />} />
-                    <Route path="/installation-services" element={<InstallationServices />} />
-                    <Route path="/iot-energy-solutions" element={<IoTEnergySolutions />} />
+                        {/* Services */}
+                        <Route path="/inverter-solutions" element={<InverterSolutions />} />
+                        <Route path="/installation-services" element={<InstallationServices />} />
+                        <Route path="/iot-energy-solutions" element={<IoTEnergySolutions />} />
 
-                    {/* Extras */}
-                    <Route path="/gallery" element={<GalleryPro />} />
-                    <Route path="/wishlist" element={<WishlistPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/checkout" element={<Checkout />} />
+                        {/* Extras */}
+                        <Route path="/gallery" element={<GalleryPro />} />
+                        <Route path="/wishlist" element={<WishlistPage />} />
+                        <Route path="/cart" element={<CartPage />} />
+                        <Route path="/checkout" element={<Checkout />} />
 
-                    {/* Fallback */}
-                    <Route path="*" element={<p className="text-center mt-10">Page not found 😏</p>} />
-                  </Routes>
+                        {/* Fallback */}
+                        <Route path="*" element={<p className="text-center mt-10">Page not found 😏</p>} />
+                      </Routes>
 
-                  <Footer />
-                </BrowserRouter>
+                      <Footer />
+                    </BrowserRouter>
                   </ProductsProvider>
                 </PlansProvider>
               </ProductsCategoryProvider>
             </WishlistProvider>
           </CartProvider>
         </LoadingProvider>
-    </main>
+      </main>
+    </ErrorBoundary>
   );
 }

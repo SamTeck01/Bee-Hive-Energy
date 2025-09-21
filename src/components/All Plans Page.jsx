@@ -1,121 +1,16 @@
 // src/pages/PlansPage.jsx
 import { HashLink } from 'react-router-hash-link';
 import { motion } from 'framer-motion';
-import PropTypes from 'prop-types';
-import { ShieldCheck, Share2, Heart, Search, X } from 'lucide-react';
+import { Search, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { useState, useContext, useMemo } from 'react';
-import { useWishlist } from './WishlistContext';
 import { PlansContext } from './PlansContext';
 import { Link } from 'react-router-dom';
+import { PlanCardSkeleton } from './LoadingSkeleton.jsx';
+import PlanCard from './PlanCard.jsx';
 
-const cardVariant = {
-  hidden: { opacity: 0, y: 30 },
-  show: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, delay: i * 0.15 },
-  }),
-};
-
-//The plans card component
-const PlanCard2 = ({ image, title, price, slug, features = [], priceLabel, ctaText, custom, onToast }) => {
-  const { planWishlist, togglePlanWishlist } = useWishlist();
-  const isWishlisted = planWishlist.includes(slug);
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: title,
-          text: `Check out this energy plan: ${title} for ${price}.`,
-          url: window.location.origin + `/plans/${slug}`,
-        })
-        .then(() => console.log('Shared successfully'))
-        .catch((error) => console.log('Share failed', error));
-    } else {
-      alert('Sharing not supported on this browser. Copy the link manually.');
-    }
-  };
-
-  return (
-    <motion.div
-      className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden w-full max-w-[320px]"
-      variants={cardVariant}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: false }}
-      custom={custom}
-    >
-      {/* Image */}
-      <div className="relative">
-        <img src={image} alt={title} className="h-44 w-full object-cover" />
-        <span className="absolute top-3 left-3 bg-white text-black text-xs font-medium px-2 py-1 rounded-full shadow">
-          {priceLabel}
-        </span>
-      </div>
-
-      {/* Details */}
-      <div className="p-4">
-        <h3 className="text-[17px] font-semibold text-gray-800">{title}</h3>
-        <p className="text-lg font-bold text-gold2 mt-1">{price}</p>
-
-        {features?.length > 0 && (
-          <ul className="space-y-1 mt-3 text-gray-500 text-sm">
-            {features.slice(0, 3).map((feat, idx) => (
-              <li key={idx} className="flex items-center gap-2">
-                <ShieldCheck size={14} className="text-green-500" /> {feat}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="flex items-center justify-between mt-5">
-          <HashLink
-            smooth
-            to={`/plans/${slug}`}
-            className="text-sm text-white bg-gold2 px-4 py-2 rounded-full hover:bg-black transition"
-          >
-            {ctaText}
-          </HashLink>
-
-          <div className="flex items-center gap-3">
-            <motion.span
-              whileTap={{ scale: 0.8 }}
-              onClick={() => {
-                togglePlanWishlist(slug);
-                onToast(`${isWishlisted ? 'Removed from Wishlist' : 'Plan Successfully Wishlisted'}`);
-              }}
-              className="cursor-pointer"
-            >
-              {isWishlisted ? (
-                <Heart size={20} fill="#e49900" stroke="#e49900" />
-              ) : (
-                <Heart size={20} className="text-gold2" />
-              )}
-            </motion.span>
-
-            <Share2 size={20} className="text-gold2 cursor-pointer" onClick={handleShare} />
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-PlanCard2.propTypes = {
-  image: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  price: PropTypes.string.isRequired,
-  slug: PropTypes.string.isRequired,
-  features: PropTypes.arrayOf(PropTypes.string),
-  priceLabel: PropTypes.string.isRequired,
-  ctaText: PropTypes.string.isRequired,
-  custom: PropTypes.number.isRequired,
-  onToast: PropTypes.func.isRequired,
-};
 
 const PlansPage = () => {
-  const { plans } = useContext(PlansContext);
+  const { plans, error, retryFetch, isLoading } = useContext(PlansContext);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [open, setOpen] = useState(false);
@@ -145,7 +40,41 @@ const PlansPage = () => {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  if (!plans || !plans.length) return <div className="pt-24 text-center">Loading plans...</div>;
+  // Error state
+  if (error) {
+    return (
+      <section className="px-4 pt-24 pb-16 md:pt-28">
+        <div className="container mx-auto">
+          <nav className="text-sm text-gray-500 mb-3">
+            <Link to="/" className="hover:underline">Home</Link>
+            <span className="mx-2">/</span>
+            <span className="text-gray-700 font-medium">All Plans</span>
+          </nav>
+
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-6">All Solar Plans</h1>
+            
+            <div className="flexCenter mt-12">
+              <div className="text-center max-w-md">
+                <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Unable to load plans
+                </h3>
+                <p className="text-gray-600 mb-6">{error}</p>
+                <button
+                  onClick={retryFetch}
+                  className="bg-gold2 text-white px-6 py-3 rounded-md hover:bg-gold2/90 transition-colors flex items-center gap-2 mx-auto"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Try Again
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="px-4 pt-24 pb-16 md:pt-28">
@@ -219,21 +148,36 @@ const PlansPage = () => {
 
         {/* Responsive Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 place-items-center">
-          {filteredPlans.map((plan, index) => (
-            <PlanCard2
-              key={plan._id}
-              image={plan.image}
-              title={plan.title}
-              slug={plan.slug}
-              price={plan.price}
-              features={plan.features}
-              ctaText={`Get ${plan.title}`}
-              custom={index}
-              priceLabel={plan.priceLabel}
-              onToast={triggerToast}
-            />
-          ))}
-          {filteredPlans.length === 0 && <p>No results found</p>}
+          {isLoading ? (
+            // Show loading skeletons
+            Array.from({ length: 9 }).map((_, index) => (
+              <PlanCardSkeleton key={index} variant="default" className="w-[320px]" />
+            ))
+          ) : filteredPlans.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-gray-500 text-lg">No plans found</p>
+              {searchTerm && (
+                <p className="text-gray-400 text-sm mt-2">
+                  Try adjusting your search terms
+                </p>
+              )}
+            </div>
+          ) : (
+            filteredPlans.map((plan, index) => (
+              <PlanCard
+                key={plan._id || plan.id || index}
+                plan={plan}
+                index={index}
+                onToast={triggerToast}
+                variant="default"
+                showRating={true}
+                showWishlist={true}
+                showShare={true}
+                showFeatures={true}
+                maxFeatures={3}
+              />
+            ))
+          )}
         </div>
       </div>
     </section>

@@ -96,11 +96,11 @@ const PlansSection = () => {
           </p>
         </motion.div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8 mt-12 place-items-center">
+        <div className="flex flex-wrap gap-4 mt-12 place-items-center">
           {isLoading ? (
             // Show loading skeletons
             Array.from({ length: 6 }).map((_, index) => (
-              <PlanCardSkeleton key={index} variant="default" className="w-[320px]" />
+              <PlanCardSkeleton key={index} variant="default" className="w-full max-w-[280px] sm:max-w-[300px] lg:max-w-[320px] mx-auto" />
             ))
           ) : (
             displayPlans.map((plan, index) => (
@@ -115,6 +115,7 @@ const PlansSection = () => {
                 showShare={true}
                 showFeatures={true}
                 maxFeatures={3}
+                className="w-full sm:max-w-[290px] md:max-w-[220px] xl:max-w-[280px] mx-auto"
               />
             ))
           )}

@@ -240,7 +240,7 @@ export default function Hero() {
         </div>
 
         {/* Mobile: Content panel (bottom half) */}
-        <div className="w-full h-1/2 lg:w-[43%] lg:h-full bg-green-900 relative text-white flex lg:items-center px-6 lg:px-10 py-8 lg:py-0">
+        <div className="w-full h-1/2 lg:w-[43%] lg:h-full bg-green-900 relative text-white flex sm:items-center lg:items-center px-6 lg:px-10 py-8 lg:py-0">
           <div className="w-full text-center lg:text-left">
               <AnimatePresence mode="wait">
                 <motion.div 
@@ -336,7 +336,7 @@ export default function Hero() {
       </div>
 
       {/* Mobile Navigation - Bottom center */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-30 lg:hidden">
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-6 z-30 lg:hidden">
         {slides.map((_, i) => (
           <motion.button
             key={i} 

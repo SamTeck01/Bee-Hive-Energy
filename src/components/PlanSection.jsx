@@ -95,7 +95,7 @@ const PlansSection = () => {
           </p>
         </motion.div>
         
-        <div className="flex flex-wrap gap-4 mt-12 place-items-center">
+        <div className="flexCenter flex-wrap gap-8 mt-12">
           {isLoading ? (
             // Show loading skeletons
             Array.from({ length: 6 }).map((_, index) => (
@@ -114,7 +114,7 @@ const PlansSection = () => {
                 showShare={true}
                 showFeatures={true}
                 maxFeatures={3}
-                className="w-full sm:max-w-[290px] md:max-w-[220px] xl:max-w-[280px] mx-auto"
+                className="w-full sm:max-w-[290px] md:max-w-[220px] xl:max-w-[280px] "
               />
             ))
           )}

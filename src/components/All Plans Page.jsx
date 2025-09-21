@@ -147,7 +147,7 @@ const PlansPage = () => {
         </p>
 
         {/* Responsive Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 place-items-center">
+        <div className="flexCenter flex-wrap gap-4 mt-12">
           {isLoading ? (
             // Show loading skeletons
             Array.from({ length: 9 }).map((_, index) => (
@@ -175,6 +175,7 @@ const PlansPage = () => {
                 showShare={true}
                 showFeatures={true}
                 maxFeatures={3}
+                className='w-full '
               />
             ))
           )}

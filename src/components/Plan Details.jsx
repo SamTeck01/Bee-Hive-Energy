@@ -10,8 +10,6 @@ import { HashLink } from 'react-router-hash-link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWishlist } from './WishlistContext';
 import { PlanCardSkeleton } from './LoadingSkeleton.jsx';
-import PlanCard from './PlanCard.jsx';
-
 
 const PlanDetails = () => {
   useEffect(() => {
@@ -350,19 +348,16 @@ const PlanDetails = () => {
             <div className='overflow-x-auto whitespace-nowrap scroll-smooth snap-x snap-mandatory pb-2'>
               <div className="flex gap-3">
                 {similarPlans.map((similar, idx) => (
-                  <div key={idx} className="w-52 shrink-0 snap-start">
-                    <PlanCard
-                      plan={similar}
-                      index={idx}
-                      variant="compact"
-                      showRating={false}
-                      showWishlist={true}
-                      showShare={false}
-                      showFeatures={false}
-                      onToast={() => {}}
-                      className="w-full"
-                    />
-                  </div>
+                  <HashLink smooth to={`/plans/${similar.slug}`}
+                    key={idx}
+                    className="w-52 shrink-0 rounded-lg hover:shadow-md transition bg-white inline-block snap-start"
+                  >
+                    <img src={similar.image} alt={similar.title} className="w-full h-40 object-cover rounded-t-md mb-1.5" />
+                    <div className='px-1 pb-1'>
+                      <h3 className="text-base font-medium text-gray-700">{similar.title}</h3>
+                      <p className="text-gold2 text-base font-semibold">{similar.price}</p>
+                    </div>
+                  </HashLink>
                 ))}
               </div>
             </div>

@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { ProductsContext } from './ProductsContext';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 
 export default function ProductCategoryPage() {
@@ -21,7 +21,15 @@ export default function ProductCategoryPage() {
 
   return (
     <section className="px-4 py-24">
-      <div className="container mx-auto text-center">
+      <div className="container mx-auto">
+        {/* ✅ Breadcrumbs */}
+        <nav className="text-sm text-gray-500">
+          <Link to="/" className="hover:underline">Home</Link>
+          <span className="mx-2">/</span>
+          <Link to="/products" className="hover:underline">All Products</Link>
+          <span className="mx-2">/</span>
+          <span className="text-gray-700 font-medium">{categoryId.replace(/-/g, ' ')}</span>
+        </nav>
         <h1 className="text-3xl font-bold text-center mb-6 capitalize">
           {categoryId.replace(/-/g, ' ')}
         </h1>

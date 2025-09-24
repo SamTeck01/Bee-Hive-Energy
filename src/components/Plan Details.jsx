@@ -129,7 +129,7 @@ const PlanDetails = () => {
                 Plan not found
               </h3>
               <p className="text-gray-600 mb-6">
-                The plan you're looking for doesn't exist or may have been removed.
+                The plan youre looking for doesnt exist or may have been removed.
               </p>
               <Link
                 to="/plans"
@@ -222,7 +222,7 @@ const PlanDetails = () => {
 
           <div className='flex md:flex-row flex-col gap-2 md:gap-10'>
             {/* Image and Add to Cart */}
-            <div className='md:w-[280px] h-60 w-full flexCenter shrink-0 md:flex md:items-start flex-col bg-white md:bg-transparent p-3 rounded-lg shadow-md md:shadow-none'>
+            <div className='md:w-[280px] min-h-60 w-full flexCenter shrink-0 md:flex md:items-start flex-col bg-white md:bg-transparent p-3 rounded-lg shadow-md md:shadow-none'>
               <div>
                 <img 
                   src={plan.image} 

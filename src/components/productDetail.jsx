@@ -123,7 +123,7 @@ export default function ProductPage() {
 
           <div className='flex md:flex-row flex-col gap-2 md:gap-10'>
             {/* Image */}
-            <div className='md:w-[280px] h-[400px] w-full flexCenter shrink-0 md:flex md:items-start flex-col bg-white md:bg-transparent p-3 rounded-lg shadow-md md:shadow-none'>
+            <div className='md:w-[280px] min-h-[400px] w-full flexCenter shrink-0 md:flex md:items-start flex-col bg-white md:bg-transparent p-3 rounded-lg shadow-md md:shadow-none'>
               <div>
                 <img 
                   src={product.image} 

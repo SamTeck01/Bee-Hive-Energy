@@ -19,6 +19,8 @@ import CartPage from './components/CartPage.jsx';
 import Checkout from './components/Checkout.jsx';
 import SearchResults from './components/SearchResults.jsx';
 
+import CheckoutSuccess from './components/Checkout Success.jsx'
+
 import { WishlistProvider } from './components/WishlistContext.jsx';
 import { PlansProvider } from './components/PlansContext.jsx';
 import { ProductsProvider } from './components/ProductsContext.jsx';
@@ -65,6 +67,9 @@ export default function App() {
                         <Route path="/wishlist" element={<WishlistPage />} />
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/checkout" element={<Checkout />} />
+
+                        {/* Payment Integration */}
+                        <Route path="/checkout-success" element={<CheckoutSuccess />} />
 
                         {/* Fallback */}
                         <Route path="*" element={<p className="text-center mt-10">Page not found 😏</p>} />

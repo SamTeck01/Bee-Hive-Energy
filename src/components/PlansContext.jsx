@@ -12,21 +12,21 @@ export const PlansProvider = ({ children }) => {
   const [retryCount, setRetryCount] = useState(0);
   const { setIsLoading } = useLoading();
 
-  const API_URL = `${config.API_URL}/plans`;
+  // IMPORTANT: Stable, production-safe API base with an env override.
+  // Priority: Vite env -> config file -> hardcoded backend URL
+  const API_BASE = (import.meta.env?.VITE_API_URL
+    ?? config?.API_URL
+    ?? 'https://bee-energy-backend.onrender.com/api');
+
+  const API_URL = `${API_BASE}/plans`;
 
   const fetchPlans = useCallback(async (isRetry = false) => {
     try {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Add timeout
-        signal: AbortSignal.timeout(10000) // 10 second timeout
-      });
+      // Keep fetch simple to maximize compatibility
+      const response = await fetch(API_URL);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

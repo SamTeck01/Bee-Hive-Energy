@@ -11,21 +11,28 @@ export const ProductsProvider = ({ children }) => {
   const [retryCount, setRetryCount] = useState(0);
   const { setIsLoading } = useLoading();
 
-  const API_URL = `${config.API_URL}/products`;
+  // IMPORTANT: Stable, production-safe API base with an env override.
+  // We first try Vite env (VITE_API_URL), then config file, then fall back
+  // to the known-good hosted backend. This guarantees we always have a URL
+  // even if env vars are missing in a build.
+  const API_BASE = (import.meta.env?.VITE_API_URL
+    // Use value from centralized config if present
+    ?? config?.API_URL
+    // FINAL HARDCODED FALLBACK (safe default)
+    ?? 'https://bee-energy-backend.onrender.com/api');
+
+  // Final endpoint we will call
+  const API_URL = `${API_BASE}/products`;
 
   const fetchProducts = useCallback(async (isRetry = false) => {
     try {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Add timeout
-        signal: AbortSignal.timeout(10000) // 10 second timeout
-      });
+      // NOTE: Avoid using AbortSignal.timeout(...) since some browsers/environments
+      // don't support it and it can break fetches completely.
+      // Keep the request simple and reliable.
+      const response = await fetch(API_URL);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

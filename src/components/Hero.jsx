@@ -11,32 +11,32 @@ const buildingInverter = "https://images.unsplash.com/photo-1473093295043-cdd812
 const slides = [
   {
     id: 'inverter-solutions',
-    title: 'Renewable and green energy industry.',
-    description: 'We are providing awesome 20+ green energy services.',
+    title: 'Reliable Inverter Solutions.',
+    description: 'We design and build durable inverters that keep your home and business running, even when the grid goes dark.',
     bgImage: buildingInverter,
     link: '/inverter-solutions',
     leftContent: {
-      badge: 'Green Savings, Bright Future'
+      badge: 'Power That Lasts'
     }
   },
   {
     id: 'installation-services',
-    title: 'Expert Installation Services',
-    description: 'Professional setup of solar panels, batteries, and energy systems.',
+    title: 'Seamless Solar Installation',
+    description: 'Our certified team installs full energy systems with zero hassle — tailored to your needs.',
     bgImage: installationBanner,
     link: '/installation-services',
     leftContent: {
-      badge: 'Professional Installation'
+      badge: 'Expert Installation'
     }
   },
   {
     id: 'iot-solutions',
-    title: 'Smart IoT Energy Solutions',
-    description: 'Monitor and control your power intelligently with smart IoT tech.',
+    title: 'Smart IoT Monitoring',
+    description: 'Track and control your solar system anytime, anywhere. Our IoT technology puts energy management in your hands.',
     bgImage: iotBanner,
     link: '/iot-energy-solutions',
     leftContent: {
-      badge: 'Smart Energy Management'
+      badge: 'Stay in Control'
     }
   },
 ];

@@ -15,7 +15,7 @@ export default function CheckoutSuccess() {
     // 3) Call backend to verify payment (optional but recommended)
     const verifyPayment = async () => {
       try {
-        const res = await axios.get(`${config.API_URL}/api/orders/verify/${reference}`);
+        const res = await axios.get(`${config.API_URL}/orders/verify/${reference}`);
         if (res.data.status === "paid") {
           setStatus("success");
         } else {

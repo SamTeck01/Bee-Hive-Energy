@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import axios from "axios";
+import config from "../config/environment";
 
 export default function CheckoutSuccess() {
   // 1) Read the ?reference=xxxx from the URL
@@ -14,7 +15,7 @@ export default function CheckoutSuccess() {
     // 3) Call backend to verify payment (optional but recommended)
     const verifyPayment = async () => {
       try {
-        const res = await axios.get(`/api/orders/verify/${reference}`);
+        const res = await axios.get(`${config.API_URL}/api/orders/verify/${reference}`);
         if (res.data.status === "paid") {
           setStatus("success");
         } else {
